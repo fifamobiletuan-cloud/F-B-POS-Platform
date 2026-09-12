@@ -4,7 +4,7 @@
 ---
 
 * **Tên đề tài (Tiếng Việt):** Xây dựng hệ sinh thái ứng dụng gọi món tại bàn qua mã QR và quản lý vận hành quán trà sữa - đồ ăn vặt
-* **Tên đề tài (Tiếng Anh):** Smart Table-Ordering and Shop Management Ecosystem for Milk Tea & Snack Stores
+* **Tên đề tài (Tiếng Anh):** Smart F&B POS & Contactless Table-Ordering Platform
 * **Sinh viên thực hiện:** Nguyễn Huỳnh Anh Tuấn
 * **Lớp:** S26K65CNTT
 * **Giảng viên hướng dẫn:** [Họ và tên Thầy/Cô]
