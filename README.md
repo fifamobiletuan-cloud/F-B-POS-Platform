@@ -4,11 +4,11 @@
 ---
 
 ## 📌 THÔNG TIN ĐỀ TÀI
-* **Đề tài:** Báo cáo đề cương Chuyên đề Công nghệ thông tin (Định hướng Đồ án Tốt nghiệp)
+* **Môn học:** Chuyên đề Công nghệ thông tin (Định hướng phát triển thành Đồ án Tốt nghiệp)
 * **Sinh viên thực hiện:** Nguyễn Huỳnh Anh Tuấn
 * **Lớp:** S26K65CNTT
 * **Chuyên ngành:** Công nghệ thông tin / Kỹ thuật phần mềm
-* **Năm học:** 2025 - 2026
+* **Năm học:** 2026 - 2027
 * **Tài liệu báo cáo chi tiết:** [📄 NguyenHuynhAnhTuan_S26K65CNTT.docx](NguyenHuynhAnhTuan_S26K65CNTT.docx)
 
 ---
