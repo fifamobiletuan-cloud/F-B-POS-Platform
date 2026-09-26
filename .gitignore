@@ -1,0 +1,17 @@
+# Build artifacts
+backend_springboot/target/
+frontend_flutter/build/
+frontend_flutter/.dart_tool/
+frontend_flutter/.pub-cache/
+frontend_flutter/.pub/
+
+# Temp & logs
+scratch/
+*.log
+*.tmp
+.DS_Store
+
+# IDE
+.idea/
+.vscode/
+*.iml

@@ -59,9 +59,45 @@ flutter:
   uses-material-design: true
 
   # To add assets to your application, add an assets section, like this:
-  # assets:
-  #   - images/a_dot_burr.jpeg
-  #   - images/a_dot_ham.jpeg
+  assets:
+    - assets/images/anvatman/cavienchien/
+    - assets/images/anvatman/xucxich/
+    - assets/images/anvatman/khoaitaychien/
+    - assets/images/anvatman/phomaique/
+    - assets/images/anvatman/nemchuaran/
+    - assets/images/doancay/banhtrangcuon/
+    - assets/images/doancay/banhtrangtron/
+    - assets/images/doancay/changacay/
+    - assets/images/nuocuong/trasua/matcha/
+    - assets/images/nuocuong/trasua/olong/
+    - assets/images/nuocuong/trasua/thai/
+    - assets/images/nuocuong/trasua/truyenthong/
+    - assets/images/nuocuong/nuocep/cam/
+    - assets/images/nuocuong/nuocep/dua/
+    - assets/images/nuocuong/tradao/
+    - assets/images/nuocuong/tratac/
+    - assets/images/banh&dongot/banhsukem/
+    - assets/images/banh&dongot/tiramisu/
+    - assets/images/banh&dongot/cupcake/
+    - assets/images/banh&dongot/banhbonglan/
+    - assets/images/snack&keo/oishi/
+    - assets/images/snack&keo/poca/
+    - assets/images/snack&keo/keodeo/
+    - assets/images/snack&keo/chocolate/
+    - assets/images/snack&keo/rongbien/
+    - assets/images/traicay&dochua/xoailac/
+    - assets/images/traicay&dochua/oilac/
+    - assets/images/traicay&dochua/me/
+    - assets/images/traicay&dochua/man/
+    - assets/images/traicay&dochua/coclac/
+    - assets/images/anvathanquoc/kimbap/
+    - assets/images/anvathanquoc/tokbokki/
+    - assets/images/anvathanquoc/mandu/
+    - assets/images/anvathanquoc/chaca/
+    - assets/images/monnonhe/mitron/
+    - assets/images/monnonhe/nuixao/
+    - assets/images/monnonhe/miIndomie/
+    - assets/images/monnonhe/comcuon_vn/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

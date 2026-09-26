@@ -26,27 +26,43 @@ class ProductOption {
 class Product {
   final String id;
   final String name;
-  final String category; // TraSua, TraTraiCay, AnVat
+  final String category;
+  final String? subcategory;
   final double basePrice;
+  final double? originalPrice;
   final String imageUrl;
+  final List<String> imageUrls;
   final String description;
   final bool isAvailable;
+  final double rating;
+  final int soldCount;
 
   Product({
     required this.id,
     required this.name,
     required this.category,
+    this.subcategory,
     required this.basePrice,
+    this.originalPrice,
     required this.imageUrl,
+    List<String>? imageUrls,
     required this.description,
     this.isAvailable = true,
-  });
+    this.rating = 4.8,
+    this.soldCount = 0,
+  }) : imageUrls = imageUrls ?? [imageUrl];
+
+  int get discountPercent {
+    if (originalPrice == null || originalPrice! <= basePrice) return 0;
+    return (((originalPrice! - basePrice) / originalPrice!) * 100).round();
+  }
 
   factory Product.fromJson(Map<String, dynamic> json) {
     return Product(
       id: json['id']?.toString() ?? '',
       name: json['name'] ?? '',
-      category: json['category'] ?? 'TraSua',
+      category: json['category'] ?? 'AnVatMan',
+      subcategory: json['subcategory'],
       basePrice: (json['basePrice'] as num?)?.toDouble() ?? 0.0,
       imageUrl: json['imageUrl'] ?? '',
       description: json['description'] ?? '',

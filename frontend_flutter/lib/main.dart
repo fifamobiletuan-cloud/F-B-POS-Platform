@@ -1,80 +1,80 @@
 import 'package:flutter/material.dart';
 import 'screens/customer_order_screen.dart';
-import 'screens/store_management_screen.dart';
+import 'widgets/floating_food_overlay.dart';
+
+// Global ValueNotifier cho Dark/Light Mode
+final ValueNotifier<bool> isDarkModeNotifier = ValueNotifier<bool>(false);
+
+// Global Cart notifier — dùng chung giữa các screens
+final ValueNotifier<List<dynamic>> cartNotifier = ValueNotifier([]);
 
 void main() {
-  runApp(const SmartMilkteaApp());
+  runApp(const RestaurantApp());
 }
 
-class SmartMilkteaApp extends StatelessWidget {
-  const SmartMilkteaApp({super.key});
+class RestaurantApp extends StatelessWidget {
+  const RestaurantApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Smart F&B POS & QR Table Ordering',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        useMaterial3: true,
-        colorSchemeSeed: Colors.brown,
-        fontFamily: 'Roboto',
-      ),
-      home: const MainNavigationShell(),
-    );
-  }
-}
+    return ValueListenableBuilder<bool>(
+      valueListenable: isDarkModeNotifier,
+      builder: (context, isDarkMode, child) {
+        return MaterialApp(
+          title: 'Ramen House — Order Menu',
+          debugShowCheckedModeBanner: false,
+          themeMode: isDarkMode ? ThemeMode.dark : ThemeMode.light,
 
-class MainNavigationShell extends StatefulWidget {
-  const MainNavigationShell({super.key});
+          // Light Theme — Figma White
+          theme: ThemeData(
+            useMaterial3: true,
+            brightness: Brightness.light,
+            colorScheme: ColorScheme.fromSeed(
+              seedColor: const Color(0xFFA81E22),
+              brightness: Brightness.light,
+            ),
+            scaffoldBackgroundColor: const Color(0xFFF8F8F8),
+            fontFamily: 'Urbanist',
+            appBarTheme: const AppBarTheme(
+              backgroundColor: Colors.white,
+              foregroundColor: Color(0xFF080808),
+              elevation: 0,
+              scrolledUnderElevation: 0,
+            ),
+          ),
 
-  @override
-  State<MainNavigationShell> createState() => _MainNavigationShellState();
-}
+          // Dark Theme — Figma Dark #080808
+          darkTheme: ThemeData(
+            useMaterial3: true,
+            brightness: Brightness.dark,
+            colorScheme: ColorScheme.fromSeed(
+              seedColor: const Color(0xFFA81E22),
+              brightness: Brightness.dark,
+            ),
+            scaffoldBackgroundColor: const Color(0xFF080808),
+            fontFamily: 'Urbanist',
+            appBarTheme: const AppBarTheme(
+              backgroundColor: Color(0xFF080808),
+              foregroundColor: Colors.white,
+              elevation: 0,
+              scrolledUnderElevation: 0,
+            ),
+          ),
 
-class _MainNavigationShellState extends State<MainNavigationShell> {
-  int _currentIndex = 0;
-
-  final List<Widget> _screens = const [
-    CustomerOrderScreen(tableFromUrl: 'Bàn 05'),
-    StoreManagementScreen(),
-  ];
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: IndexedStack(
-        index: _currentIndex,
-        children: _screens,
-      ),
-      bottomNavigationBar: Container(
-        decoration: BoxDecoration(
-          boxShadow: [
-            BoxShadow(color: Colors.black.withValues(alpha: 0.1), blurRadius: 10, offset: const Offset(0, -2))
-          ],
-        ),
-        child: BottomNavigationBar(
-          currentIndex: _currentIndex,
-          selectedItemColor: Colors.brown,
-          unselectedItemColor: Colors.grey,
-          onTap: (index) {
-            setState(() {
-              _currentIndex = index;
-            });
+          builder: (context, child) {
+            return Stack(
+              children: [
+                ?child,
+                const Positioned.fill(
+                  child: GlobalFloatingFoodOverlay(),
+                ),
+              ],
+            );
           },
-          items: const [
-            BottomNavigationBarItem(
-              icon: Icon(Icons.qr_code_scanner),
-              activeIcon: Icon(Icons.qr_code_2),
-              label: 'Web Khách Quét QR',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.storefront_outlined),
-              activeIcon: Icon(Icons.storefront),
-              label: 'App Quản Lý Cửa Hàng',
-            ),
-          ],
-        ),
-      ),
+
+          home: const CustomerOrderScreen(),
+        );
+      },
     );
   }
 }
