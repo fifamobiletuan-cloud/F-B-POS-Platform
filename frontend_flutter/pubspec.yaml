@@ -60,44 +60,105 @@ flutter:
 
   # To add assets to your application, add an assets section, like this:
   assets:
+    # Ăn vặt Hàn Quốc
+    - assets/images/anvathanquoc/Bingsoo/
+    - assets/images/anvathanquoc/chaca/
+    - assets/images/anvathanquoc/Dalgona/
+    - assets/images/anvathanquoc/Gimbap/
+    - assets/images/anvathanquoc/Hotteok/
+    - assets/images/anvathanquoc/Japchae/
+    - assets/images/anvathanquoc/kimbap/
+    - assets/images/anvathanquoc/mandu/
+    - assets/images/anvathanquoc/tokbokki/
+    - assets/images/anvathanquoc/tteokbanhgaonuong/
+    # Ăn vặt mặn
+    - assets/images/anvatman/banhgaochien/
+    - assets/images/anvatman/bapxaobo/
+    - assets/images/anvatman/boviennuong/
     - assets/images/anvatman/cavienchien/
-    - assets/images/anvatman/xucxich/
+    - assets/images/anvatman/dauhuchienmam/
     - assets/images/anvatman/khoaitaychien/
-    - assets/images/anvatman/phomaique/
     - assets/images/anvatman/nemchuaran/
+    - assets/images/anvatman/phomaique/
+    - assets/images/anvatman/trungcutchien/
+    - assets/images/anvatman/xucxich/
+    # Bánh & đồ ngọt
+    - assets/images/banh&dongot/banhbonglan/
+    - assets/images/banh&dongot/banhdonutphuduong/
+    - assets/images/banh&dongot/banhmochinhandaudo/
+    - assets/images/banh&dongot/banhsukem/
+    - assets/images/banh&dongot/crepematcha/
+    - assets/images/banh&dongot/cupcake/
+    - assets/images/banh&dongot/puddingcaramel/
+    - assets/images/banh&dongot/tartsuadua/
+    - assets/images/banh&dongot/tiramisu/
+    - assets/images/banh&dongot/waffle/
+    # Đồ ăn cay
     - assets/images/doancay/banhtrangcuon/
     - assets/images/doancay/banhtrangtron/
+    - assets/images/doancay/bokhosate/
     - assets/images/doancay/changacay/
+    - assets/images/doancay/gacaychiengion/
+    - assets/images/doancay/lauminicay/
+    - assets/images/doancay/micay/
+    - assets/images/doancay/micayHancap5/
+    - assets/images/doancay/mucrimsate/
+    - assets/images/doancay/tokbokkicayngot/
+    - assets/images/doancay/trungvitlonsotcay/
+    # Món no nhẹ
+    - assets/images/monnonhe/banhgio/
+    - assets/images/monnonhe/banhmiopla/
+    - assets/images/monnonhe/banhuotcuonthit/
+    - assets/images/monnonhe/chaoyenmach/
+    - assets/images/monnonhe/comchienduongchau/
+    - assets/images/monnonhe/comcuon/
+    - assets/images/monnonhe/comcuon_vn/
+    - assets/images/monnonhe/miIndomie/
+    - assets/images/monnonhe/mitron/
+    - assets/images/monnonhe/nuixao/
+    - assets/images/monnonhe/phocuonrau/
+    - assets/images/monnonhe/sandwichcangu/
+    - assets/images/monnonhe/xoibap/
+    # Nước uống
+    - assets/images/nuocuong/cacao/cacaodua/
+    - assets/images/nuocuong/cacao/cacaonongda/
+    - assets/images/nuocuong/cacao/caccaosua/
+    - assets/images/nuocuong/nuocep/cam/
+    - assets/images/nuocuong/nuocep/dua/
+    - assets/images/nuocuong/nuocep/duahau/
+    - assets/images/nuocuong/nuocep/le/
+    - assets/images/nuocuong/nuocep/nho/
+    - assets/images/nuocuong/nuocep/tao/
+    - assets/images/nuocuong/nuocep/xoai/
+    - assets/images/nuocuong/tradao/
+    - assets/images/nuocuong/trasua/duongden/
     - assets/images/nuocuong/trasua/matcha/
     - assets/images/nuocuong/trasua/olong/
     - assets/images/nuocuong/trasua/thai/
     - assets/images/nuocuong/trasua/truyenthong/
-    - assets/images/nuocuong/nuocep/cam/
-    - assets/images/nuocuong/nuocep/dua/
-    - assets/images/nuocuong/tradao/
     - assets/images/nuocuong/tratac/
-    - assets/images/banh&dongot/banhsukem/
-    - assets/images/banh&dongot/tiramisu/
-    - assets/images/banh&dongot/cupcake/
-    - assets/images/banh&dongot/banhbonglan/
+    # Snack & kẹo
+    - assets/images/snack&keo/banhquybo/
+    - assets/images/snack&keo/caramelmem/
+    - assets/images/snack&keo/chocolate/
+    - assets/images/snack&keo/keodeo/
+    - assets/images/snack&keo/keololipop/
     - assets/images/snack&keo/oishi/
     - assets/images/snack&keo/poca/
-    - assets/images/snack&keo/keodeo/
-    - assets/images/snack&keo/chocolate/
     - assets/images/snack&keo/rongbien/
-    - assets/images/traicay&dochua/xoailac/
-    - assets/images/traicay&dochua/oilac/
-    - assets/images/traicay&dochua/me/
-    - assets/images/traicay&dochua/man/
+    - assets/images/snack&keo/snackkhoailang/
+    - assets/images/snack&keo/snackmucthai/
+    # Trái cây & chua
+    - assets/images/traicay&dochua/chomchomtuoi/
+    - assets/images/traicay&dochua/chuoisay/
     - assets/images/traicay&dochua/coclac/
-    - assets/images/anvathanquoc/kimbap/
-    - assets/images/anvathanquoc/tokbokki/
-    - assets/images/anvathanquoc/mandu/
-    - assets/images/anvathanquoc/chaca/
-    - assets/images/monnonhe/mitron/
-    - assets/images/monnonhe/nuixao/
-    - assets/images/monnonhe/miIndomie/
-    - assets/images/monnonhe/comcuon_vn/
+    - assets/images/traicay&dochua/dualacmuoi/
+    - assets/images/traicay&dochua/khechuamuoiot/
+    - assets/images/traicay&dochua/man/
+    - assets/images/traicay&dochua/me/
+    - assets/images/traicay&dochua/oilac/
+    - assets/images/traicay&dochua/saungamduong/
+    - assets/images/traicay&dochua/xoailac/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

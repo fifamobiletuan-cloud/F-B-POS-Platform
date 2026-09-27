@@ -36,13 +36,11 @@ const List<FoodCategory> kCategories = [
 
 // Sub-danh mục đồ uống
 const Map<String, String> kDrinkSubcats = {
-  'traSua': '🧋 Trà sữa',
-  'nuocEp': '🍊 Nước ép',
-  'tra': '🍵 Trà',
+  'tradao': '🍑 Trà đào',
+  'tratac': '🍋 Trà tắc',
+  'trasua': '🧋 Trà sữa',
   'cacao': '🍫 Cacao',
-  'sinhTo': '🥤 Sinh tố',
-  'cafe': '☕ Cà phê',
-  'khac': '🧊 Khác',
+  'nuocep': '🍊 Nước ép',
 };
 
 // ─────────────────── HomeMenuScreen ───────────────────
@@ -354,10 +352,11 @@ class _HomeMenuScreenState extends State<HomeMenuScreen>
 
                               const SliverToBoxAdapter(child: SizedBox(height: 6)),
 
-                              // Section header
-                              SliverToBoxAdapter(
-                                child: _buildSectionHeader(isDark, textColor),
-                              ),
+                              // Section header (cho các danh mục khác hoặc khi đang tìm kiếm)
+                              if (_selectedCategory != 'NuocUong' || _searchQuery.isNotEmpty)
+                                SliverToBoxAdapter(
+                                  child: _buildSectionHeader(isDark, textColor),
+                                ),
 
                               // Popular (horizontal) only for All
                               if (_selectedCategory == 'All' && _searchQuery.isEmpty) ...[
@@ -385,24 +384,35 @@ class _HomeMenuScreenState extends State<HomeMenuScreen>
                                 const SliverToBoxAdapter(child: SizedBox(height: 10)),
                               ],
 
-                              // Product list
-                              SliverPadding(
-                                padding: const EdgeInsets.fromLTRB(16, 4, 16, 120),
-                                sliver: _filteredProducts.isEmpty
-                                    ? SliverToBoxAdapter(
-                                        child: _buildEmptyState(isDark, textColor),
-                                      )
-                                    : SliverList(
-                                        delegate: SliverChildBuilderDelegate(
-                                          (ctx, i) => Padding(
-                                            padding: const EdgeInsets.only(bottom: 12),
-                                            child: _buildProductCard(
-                                              _filteredProducts[i], cart, isDark, cardBg, textColor, subColor),
+                              // Danh mục Nước Uống: Các đề mục nhỏ từ trên xuống dưới, sản phẩm nằm kế bên nhau
+                              if (_selectedCategory == 'NuocUong' && _searchQuery.isEmpty)
+                                SliverPadding(
+                                  padding: const EdgeInsets.fromLTRB(0, 10, 0, 120),
+                                  sliver: SliverList(
+                                    delegate: SliverChildListDelegate(
+                                      _buildDrinkSections(cart, isDark, cardBg, textColor, subColor),
+                                    ),
+                                  ),
+                                )
+                              else
+                                // Product list cho các danh mục khác hoặc khi đang search
+                                SliverPadding(
+                                  padding: const EdgeInsets.fromLTRB(16, 4, 16, 120),
+                                  sliver: _filteredProducts.isEmpty
+                                      ? SliverToBoxAdapter(
+                                          child: _buildEmptyState(isDark, textColor),
+                                        )
+                                      : SliverList(
+                                          delegate: SliverChildBuilderDelegate(
+                                            (ctx, i) => Padding(
+                                              padding: const EdgeInsets.only(bottom: 12),
+                                              child: _buildProductCard(
+                                                _filteredProducts[i], cart, isDark, cardBg, textColor, subColor),
+                                            ),
+                                            childCount: _filteredProducts.length,
                                           ),
-                                          childCount: _filteredProducts.length,
                                         ),
-                                      ),
-                              ),
+                                ),
                             ],
                           ),
                         ),
@@ -464,6 +474,78 @@ class _HomeMenuScreenState extends State<HomeMenuScreen>
               ),
             ),
           ),
+          // Nút bật/tắt hiệu ứng đồ ăn bay (đặt kế bên nút giao diện tối/sáng)
+          ValueListenableBuilder<bool>(
+            valueListenable: isFoodOverlayEnabledNotifier,
+            builder: (context, isFoodEnabled, _) {
+              return Tooltip(
+                message: isFoodEnabled
+                    ? 'Bấm để tắt icon đồ ăn rơi'
+                    : 'Bấm để bật icon đồ ăn rơi',
+                child: GestureDetector(
+                  onTap: () {
+                    isFoodOverlayEnabledNotifier.value =
+                        !isFoodOverlayEnabledNotifier.value;
+                    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Row(
+                          children: [
+                            Text(
+                              isFoodOverlayEnabledNotifier.value ? '🍓' : '⏸️',
+                              style: const TextStyle(fontSize: 18),
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              isFoodOverlayEnabledNotifier.value
+                                  ? 'Đã bật hiệu ứng đồ ăn rơi'
+                                  : 'Đã tắt hiệu ứng đồ ăn rơi',
+                              style: const TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                          ],
+                        ),
+                        backgroundColor: isFoodOverlayEnabledNotifier.value
+                            ? const Color(0xFFE65100)
+                            : const Color(0xFF424242),
+                        duration: const Duration(seconds: 2),
+                        behavior: SnackBarBehavior.floating,
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10)),
+                      ),
+                    );
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+                    decoration: BoxDecoration(
+                      color: isDark ? kDarkCard2 : const Color(0xFFF2F2F7),
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(
+                        color: isFoodEnabled
+                            ? Colors.orange.withValues(alpha: 0.5)
+                            : Colors.transparent,
+                        width: 1,
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          isFoodEnabled ? '✨' : '💤',
+                          style: const TextStyle(fontSize: 14),
+                        ),
+                        const SizedBox(width: 2),
+                        Text(
+                          isFoodEnabled ? '🍕' : '🚫',
+                          style: const TextStyle(fontSize: 14),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+          const SizedBox(width: 8),
           GestureDetector(
             onTap: () => isDarkModeNotifier.value = !isDarkModeNotifier.value,
             child: Container(
@@ -942,16 +1024,30 @@ class _HomeMenuScreenState extends State<HomeMenuScreen>
 
   // ─────────────────── DRINK SUB-CATEGORIES ───────────────────
   Widget _buildDrinkSubcategories(bool isDark, Color cardBg, Color textColor) {
-    final subMap = ApiService.getDrinkSubcategories();
-    final keys = subMap.keys.toList();
+    const orderedKeys = ['tradao', 'tratac', 'trasua', 'cacao', 'nuocep'];
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Loại đồ uống', style: TextStyle(color: textColor, fontSize: 14, fontWeight: FontWeight.w600)),
-          const SizedBox(height: 8),
+          Row(
+            children: [
+              Text('Phân loại đồ uống',
+                  style: TextStyle(color: textColor, fontSize: 15, fontWeight: FontWeight.bold)),
+              const SizedBox(width: 8),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF0288D1).withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: const Text('Menu chi tiết',
+                    style: TextStyle(color: Color(0xFF0288D1), fontSize: 11, fontWeight: FontWeight.bold)),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: Row(
@@ -963,21 +1059,32 @@ class _HomeMenuScreenState extends State<HomeMenuScreen>
                     onTap: () => setState(() => _selectedSubcategory = ''),
                     child: AnimatedContainer(
                       duration: const Duration(milliseconds: 150),
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                       decoration: BoxDecoration(
-                        color: _selectedSubcategory.isEmpty ? const Color(0xFF0288D1) : (isDark ? kDarkCard2 : const Color(0xFFF2F2F7)),
+                        color: _selectedSubcategory.isEmpty
+                            ? const Color(0xFF0288D1)
+                            : (isDark ? kDarkCard2 : const Color(0xFFF2F2F7)),
                         borderRadius: BorderRadius.circular(16),
+                        boxShadow: _selectedSubcategory.isEmpty
+                            ? [
+                                BoxShadow(
+                                  color: const Color(0xFF0288D1).withValues(alpha: 0.35),
+                                  blurRadius: 8,
+                                  offset: const Offset(0, 3),
+                                )
+                              ]
+                            : null,
                       ),
                       child: Text('🥤 Tất cả',
                           style: TextStyle(
                             color: _selectedSubcategory.isEmpty ? Colors.white : textColor,
-                            fontSize: 12,
-                            fontWeight: FontWeight.w500,
+                            fontSize: 13,
+                            fontWeight: FontWeight.bold,
                           )),
                     ),
                   ),
                 ),
-                ...keys.map((key) {
+                ...orderedKeys.map((key) {
                   final isSelected = _selectedSubcategory == key;
                   final label = kDrinkSubcats[key] ?? key;
                   return Padding(
@@ -986,15 +1093,26 @@ class _HomeMenuScreenState extends State<HomeMenuScreen>
                       onTap: () => setState(() => _selectedSubcategory = key),
                       child: AnimatedContainer(
                         duration: const Duration(milliseconds: 150),
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                         decoration: BoxDecoration(
-                          color: isSelected ? const Color(0xFF0288D1) : (isDark ? kDarkCard2 : const Color(0xFFF2F2F7)),
+                          color: isSelected
+                              ? const Color(0xFF0288D1)
+                              : (isDark ? kDarkCard2 : const Color(0xFFF2F2F7)),
                           borderRadius: BorderRadius.circular(16),
+                          boxShadow: isSelected
+                              ? [
+                                  BoxShadow(
+                                    color: const Color(0xFF0288D1).withValues(alpha: 0.35),
+                                    blurRadius: 8,
+                                    offset: const Offset(0, 3),
+                                  )
+                                ]
+                              : null,
                         ),
                         child: Text(label,
                             style: TextStyle(
                               color: isSelected ? Colors.white : textColor,
-                              fontSize: 12,
+                              fontSize: 13,
                               fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
                             )),
                       ),
@@ -1005,6 +1123,251 @@ class _HomeMenuScreenState extends State<HomeMenuScreen>
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  // ─────────────────── DRINK SECTIONS (Dọc từ trên xuống, sản phẩm nằm kế bên nhau) ───────────────────
+  List<Widget> _buildDrinkSections(
+      CartState cart, bool isDark, Color cardBg, Color textColor, Color subColor) {
+    final allDrinks = widget.products
+        .where((p) => p.category == 'NuocUong')
+        .map(_applyDiscountToProduct)
+        .toList();
+
+    const orderedKeys = ['tradao', 'tratac', 'trasua', 'cacao', 'nuocep'];
+    const subcatTitles = {
+      'tradao': '🍑 Trà Đào Tươi Mát',
+      'tratac': '🍋 Trà Tắc Sảng Khoái',
+      'trasua': '🧋 Trà Sữa Đậm Vị Thơm Béo',
+      'cacao': '🍫 Cacao Đậm Đà Béo Ngậy',
+      'nuocep': '🍊 Nước Ép Trái Cây Tươi',
+    };
+    const subcatDescriptions = {
+      'tradao': 'Đào giòn ngọt mọng nước kết hợp trà thanh mát',
+      'tratac': 'Chua chua ngọt ngọt giải nhiệt cực đã',
+      'trasua': 'Trân châu đường đen, matcha, ô long, thái, truyền thống chuẩn vị',
+      'cacao': 'Cacao nóng đá, cacao dừa, cacao sữa thơm lừng',
+      'nuocep': 'Cam, táo, xoài, dưa hấu, lê, nho, dừa nguyên chất 100%',
+    };
+
+    final List<String> targetKeys = _selectedSubcategory.isNotEmpty
+        ? [_selectedSubcategory]
+        : orderedKeys;
+
+    final List<Widget> sections = [];
+
+    for (final key in targetKeys) {
+      final items = allDrinks.where((p) => p.subcategory == key).toList();
+      if (items.isEmpty) continue;
+
+      final title = subcatTitles[key] ?? (kDrinkSubcats[key] ?? key);
+      final desc = subcatDescriptions[key] ?? '';
+
+      sections.add(
+        Padding(
+          padding: const EdgeInsets.only(bottom: 22),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Tiêu đề danh mục nhỏ xếp từ trên xuống dưới
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 6, 16, 10),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            title,
+                            style: TextStyle(
+                              color: textColor,
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          if (desc.isNotEmpty) ...[
+                            const SizedBox(height: 2),
+                            Text(
+                              desc,
+                              style: TextStyle(
+                                color: subColor,
+                                fontSize: 11,
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF0288D1).withValues(alpha: 0.12),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text(
+                        '${items.length} món',
+                        style: const TextStyle(
+                          color: Color(0xFF0288D1),
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              // Các sản phẩm của danh mục đó nằm kế bên nhau (cuộn ngang)
+              SizedBox(
+                height: 235,
+                child: ListView.separated(
+                  scrollDirection: Axis.horizontal,
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  itemCount: items.length,
+                  separatorBuilder: (context, index) => const SizedBox(width: 12),
+                  itemBuilder: (ctx, i) => _buildDrinkCard(
+                    items[i], cart, isDark, cardBg, textColor, subColor,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    if (sections.isEmpty) {
+      sections.add(_buildEmptyState(isDark, textColor));
+    }
+
+    return sections;
+  }
+
+  // ─────────────────── DRINK CARD (Nằm kế bên nhau) ───────────────────
+  Widget _buildDrinkCard(Product item, CartState cart, bool isDark, Color cardBg,
+      Color textColor, Color subColor) {
+    return GestureDetector(
+      onTap: () => _navigateToDetail(item, cart),
+      child: Container(
+        width: 155,
+        decoration: BoxDecoration(
+          color: cardBg,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+              color: isDark ? const Color(0xFF3A3A3C) : const Color(0xFFE5E5EA)),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: isDark ? 0.25 : 0.06),
+              blurRadius: 8,
+              offset: const Offset(0, 3),
+            )
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Stack(
+              children: [
+                ClipRRect(
+                  borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+                  child: _buildSmartImage(item.imageUrl, double.infinity, 115),
+                ),
+                if (item.discountPercent > 0)
+                  Positioned(
+                    top: 8,
+                    left: 8,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                      decoration: BoxDecoration(
+                        color: kRed,
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: Text(
+                        '-${item.discountPercent}%',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+            Padding(
+              padding: const EdgeInsets.all(8),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    item.name,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      color: textColor,
+                      fontSize: 13,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 3),
+                  Row(
+                    children: [
+                      const Icon(Icons.star_rounded, color: Color(0xFFFFC107), size: 12),
+                      const SizedBox(width: 2),
+                      Text('${item.rating}',
+                          style: TextStyle(color: subColor, fontSize: 10)),
+                      const SizedBox(width: 3),
+                      Text('· ${_formatSold(item.soldCount)}',
+                          style: TextStyle(color: subColor, fontSize: 10)),
+                    ],
+                  ),
+                  const SizedBox(height: 6),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            '${item.basePrice.toStringAsFixed(0)}đ',
+                            style: const TextStyle(
+                              color: kRed,
+                              fontSize: 13,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          if (item.originalPrice != null)
+                            Text(
+                              '${item.originalPrice!.toStringAsFixed(0)}đ',
+                              style: TextStyle(
+                                color: subColor,
+                                fontSize: 10,
+                                decoration: TextDecoration.lineThrough,
+                              ),
+                            ),
+                        ],
+                      ),
+                      GestureDetector(
+                        onTap: () => _navigateToDetail(item, cart),
+                        child: Container(
+                          width: 26,
+                          height: 26,
+                          decoration: BoxDecoration(
+                            color: kRed,
+                            borderRadius: BorderRadius.circular(7),
+                          ),
+                          child: const Icon(Icons.add, color: Colors.white, size: 17),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

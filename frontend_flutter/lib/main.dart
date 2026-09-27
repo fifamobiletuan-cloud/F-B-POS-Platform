@@ -5,6 +5,9 @@ import 'widgets/floating_food_overlay.dart';
 // Global ValueNotifier cho Dark/Light Mode
 final ValueNotifier<bool> isDarkModeNotifier = ValueNotifier<bool>(false);
 
+// Global ValueNotifier cho hiệu ứng đồ ăn rơi (mặc định bật)
+final ValueNotifier<bool> isFoodOverlayEnabledNotifier = ValueNotifier<bool>(true);
+
 // Global Cart notifier — dùng chung giữa các screens
 final ValueNotifier<List<dynamic>> cartNotifier = ValueNotifier([]);
 
@@ -65,8 +68,14 @@ class RestaurantApp extends StatelessWidget {
             return Stack(
               children: [
                 ?child,
-                const Positioned.fill(
-                  child: GlobalFloatingFoodOverlay(),
+                ValueListenableBuilder<bool>(
+                  valueListenable: isFoodOverlayEnabledNotifier,
+                  builder: (context, enabled, _) {
+                    if (!enabled) return const SizedBox.shrink();
+                    return const Positioned.fill(
+                      child: GlobalFloatingFoodOverlay(),
+                    );
+                  },
                 ),
               ],
             );
