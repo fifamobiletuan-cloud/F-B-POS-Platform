@@ -454,10 +454,10 @@ class _HomeMenuScreenState extends State<HomeMenuScreen>
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // 1. Logo quán ChouxChin kéo dài, sắc nét, đẹp mắt
+            // 1. Logo quán ChouxChin kéo dài (bằng đúng chiều dài khung trước đó, bỏ chữ)
             Container(
               height: 46,
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              width: 148,
               decoration: BoxDecoration(
                 color: isDark ? const Color(0xFF2C2C2E) : Colors.white,
                 borderRadius: BorderRadius.circular(14),
@@ -473,53 +473,21 @@ class _HomeMenuScreenState extends State<HomeMenuScreen>
                   ),
                 ],
               ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(10),
-                    child: Image.asset(
-                      'assets/images/logo/ChouxChin.png',
-                      height: 38,
-                      width: 38,
-                      fit: BoxFit.cover,
-                      errorBuilder: (ctx, err, stack) => Container(
-                        width: 38,
-                        height: 38,
-                        color: kRed,
-                        child: const Center(
-                          child: Text('CC',
-                              style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-                        ),
-                      ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(13),
+                child: Image.asset(
+                  'assets/images/logo/ChouxChin.png',
+                  width: 148,
+                  height: 46,
+                  fit: BoxFit.fill,
+                  errorBuilder: (ctx, err, stack) => Container(
+                    color: kRed,
+                    child: const Center(
+                      child: Text('ChouxChin',
+                          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
                     ),
                   ),
-                  const SizedBox(width: 8),
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'ChouxChin',
-                        style: TextStyle(
-                          color: textColor,
-                          fontSize: 14,
-                          fontWeight: FontWeight.w900,
-                          letterSpacing: 0.5,
-                        ),
-                      ),
-                      const Text(
-                        'Ăn Vặt & Trà Sữa',
-                        style: TextStyle(
-                          color: kRed,
-                          fontSize: 9.5,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(width: 6),
-                ],
+                ),
               ),
             ),
             const SizedBox(width: 8),
