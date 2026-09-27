@@ -6,6 +6,7 @@ import '../customer_order_screen.dart';
 import 'food_detail_screen.dart';
 import 'cart_screen.dart';
 import '../../widgets/tiktok_lucky_wheel_dialog.dart';
+import '../../services/music_service.dart';
 
 // ─────────────────── Định nghĩa danh mục ───────────────────
 class FoodCategory {
@@ -181,6 +182,7 @@ class _HomeMenuScreenState extends State<HomeMenuScreen>
   @override
   void initState() {
     super.initState();
+    MusicService.instance.init();
     _filterAnimCtrl = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 280),
@@ -305,9 +307,11 @@ class _HomeMenuScreenState extends State<HomeMenuScreen>
         return Scaffold(
           backgroundColor: bg,
           body: SafeArea(
-            child: ListenableBuilder(
-              listenable: cart,
-              builder: (context, _) {
+            child: Listener(
+              onPointerDown: (_) => MusicService.instance.triggerOnUserInteraction(),
+              child: ListenableBuilder(
+                listenable: cart,
+                builder: (context, _) {
                 return Stack(
                   children: [
                     // ── Main content ──
@@ -432,7 +436,8 @@ class _HomeMenuScreenState extends State<HomeMenuScreen>
               },
             ),
           ),
-        );
+        ),
+      );
       },
     );
   }
@@ -444,6 +449,40 @@ class _HomeMenuScreenState extends State<HomeMenuScreen>
       padding: const EdgeInsets.fromLTRB(16, 10, 16, 10),
       child: Row(
         children: [
+          // Logo quán ChouxChin đặt ở trên cùng bên trái đầu tiên
+          Container(
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: isDark ? const Color(0xFF3A3A3C) : const Color(0xFFE5E5EA),
+                width: 1,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.08),
+                  blurRadius: 6,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(11),
+              child: Image.asset(
+                'assets/images/logo/ChouxChin.png',
+                fit: BoxFit.cover,
+                errorBuilder: (ctx, err, stack) => Container(
+                  color: kRed,
+                  child: const Center(
+                    child: Text('CC',
+                        style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                  ),
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(width: 10),
           Expanded(
             child: GestureDetector(
               onTap: () => _showChangeTableDialog(cart, isDark),
@@ -474,6 +513,80 @@ class _HomeMenuScreenState extends State<HomeMenuScreen>
               ),
             ),
           ),
+          // Nút bật/tắt nhạc nền quán (ngẫu nhiên 1 trong 6 bài)
+          ValueListenableBuilder<bool>(
+            valueListenable: MusicService.instance.isPlayingNotifier,
+            builder: (context, isMusicPlaying, _) {
+              return ValueListenableBuilder<int>(
+                valueListenable: MusicService.instance.currentTrackIndexNotifier,
+                builder: (context, trackIdx, _) {
+                  return Tooltip(
+                    message: isMusicPlaying
+                        ? 'Bấm để tắt nhạc quán (Đang phát bài $trackIdx/6)'
+                        : 'Bấm để bật nhạc quán',
+                    child: GestureDetector(
+                      onTap: () async {
+                        final willPlay = await MusicService.instance.toggleMusic();
+                        if (!context.mounted) return;
+                        ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Row(
+                              children: [
+                                Text(
+                                  willPlay ? '🎵' : '🔇',
+                                  style: const TextStyle(fontSize: 18),
+                                ),
+                                const SizedBox(width: 8),
+                                Text(
+                                  willPlay
+                                      ? 'Đang phát nhạc quán (Bài $trackIdx/6)'
+                                      : 'Đã tắt nhạc quán',
+                                  style: const TextStyle(fontWeight: FontWeight.bold),
+                                ),
+                              ],
+                            ),
+                            backgroundColor: willPlay
+                                ? const Color(0xFF00897B)
+                                : const Color(0xFF424242),
+                            duration: const Duration(seconds: 2),
+                            behavior: SnackBarBehavior.floating,
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10)),
+                          ),
+                        );
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+                        decoration: BoxDecoration(
+                          color: isMusicPlaying
+                              ? (isDark ? const Color(0xFF00382E) : const Color(0xFFE0F2F1))
+                              : (isDark ? kDarkCard2 : const Color(0xFFF2F2F7)),
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(
+                            color: isMusicPlaying
+                                ? const Color(0xFF00897B).withValues(alpha: 0.5)
+                                : Colors.transparent,
+                            width: 1,
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              isMusicPlaying ? '🎵' : '🔇',
+                              style: const TextStyle(fontSize: 14),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              );
+            },
+          ),
+          const SizedBox(width: 8),
           // Nút bật/tắt hiệu ứng đồ ăn bay (đặt kế bên nút giao diện tối/sáng)
           ValueListenableBuilder<bool>(
             valueListenable: isFoodOverlayEnabledNotifier,
