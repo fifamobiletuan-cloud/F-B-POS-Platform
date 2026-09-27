@@ -25,7 +25,7 @@ class RestaurantApp extends StatelessWidget {
       valueListenable: isDarkModeNotifier,
       builder: (context, isDarkMode, child) {
         return MaterialApp(
-          title: 'Ramen House — Order Menu',
+          title: 'ChouxChin - Quán ăn vặt',
           debugShowCheckedModeBanner: false,
           themeMode: isDarkMode ? ThemeMode.dark : ThemeMode.light,
 

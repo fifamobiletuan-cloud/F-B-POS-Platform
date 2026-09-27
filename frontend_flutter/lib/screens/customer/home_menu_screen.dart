@@ -155,6 +155,149 @@ class _HomeMenuScreenState extends State<HomeMenuScreen>
     );
   }
 
+  void _showBrandLogoDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: true,
+      builder: (ctx) {
+        final isDark = Theme.of(ctx).brightness == Brightness.dark;
+        return Dialog(
+          backgroundColor: Colors.transparent,
+          insetPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+          child: Stack(
+            clipBehavior: Clip.none,
+            alignment: Alignment.center,
+            children: [
+              Container(
+                width: double.infinity,
+                constraints: const BoxConstraints(maxWidth: 380),
+                padding: const EdgeInsets.fromLTRB(20, 24, 20, 20),
+                decoration: BoxDecoration(
+                  color: isDark ? const Color(0xFF1E1E20) : Colors.white,
+                  borderRadius: BorderRadius.circular(24),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.35),
+                      blurRadius: 24,
+                      offset: const Offset(0, 8),
+                    ),
+                  ],
+                  border: Border.all(
+                    color: isDark ? const Color(0xFF3A3A3C) : const Color(0xFFFFD1DC),
+                    width: 2,
+                  ),
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // Ảnh logo thương hiệu ChouxChin to rõ, cực đẹp
+                    Container(
+                      constraints: const BoxConstraints(maxHeight: 280),
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: isDark ? const Color(0xFF2C2C2E) : const Color(0xFFFFF0F3),
+                        borderRadius: BorderRadius.circular(18),
+                      ),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(14),
+                        child: Image.asset(
+                          'assets/images/logo/ChouxChin.png',
+                          fit: BoxFit.contain,
+                          filterQuality: FilterQuality.high,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      'ChouxChin - Quán Ăn Vặt',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w900,
+                        color: isDark ? Colors.white : const Color(0xFF1C1C1E),
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    const Text(
+                      'Ăn Vặt Ngon • Trà Sữa Đậm Vị • Phục Vụ Tận Tâm',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 12.5,
+                        fontWeight: FontWeight.w600,
+                        color: kRed,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Chào mừng quý khách đến với ChouxChin! Quét mã gọi món tiện lợi ngay tại bàn. Chúc bạn có một trải nghiệm thật ngon miệng! 💕',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: isDark ? Colors.white70 : const Color(0xFF636366),
+                        height: 1.4,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: kRed,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                          elevation: 0,
+                        ),
+                        onPressed: () => Navigator.of(ctx).pop(),
+                        child: const Text(
+                          'Đóng',
+                          style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Positioned(
+                top: -12,
+                right: -12,
+                child: GestureDetector(
+                  onTap: () => Navigator.of(ctx).pop(),
+                  child: Container(
+                    width: 34,
+                    height: 34,
+                    decoration: BoxDecoration(
+                      color: isDark ? const Color(0xFF2C2C2E) : Colors.white,
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.2),
+                          blurRadius: 6,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                      border: Border.all(
+                        color: isDark ? const Color(0xFF3A3A3C) : const Color(0xFFE5E5EA),
+                        width: 1,
+                      ),
+                    ),
+                    child: Icon(
+                      Icons.close_rounded,
+                      size: 18,
+                      color: isDark ? Colors.white : Colors.black87,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   List<Product> get _filteredProducts {
     List<Product> src;
     if (_selectedCategory == 'All') {
@@ -454,39 +597,42 @@ class _HomeMenuScreenState extends State<HomeMenuScreen>
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // 1. Logo quán ChouxChin tỉ lệ chuẩn 1:1, vừa vặn, sắc nét và siêu xinh
-            Tooltip(
-              message: 'ChouxChin Quán — Chúc bạn ngon miệng! 💕',
-              child: Container(
-                height: 48,
-                width: 48,
-                padding: const EdgeInsets.all(3),
-                decoration: BoxDecoration(
-                  color: isDark ? const Color(0xFF2C2C2E) : Colors.white,
-                  borderRadius: BorderRadius.circular(14),
-                  border: Border.all(
-                    color: isDark ? const Color(0xFF3A3A3C) : const Color(0xFFFFD1DC),
-                    width: 1.5,
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: const Color(0xFFFF4081).withValues(alpha: isDark ? 0.2 : 0.1),
-                      blurRadius: 6,
-                      offset: const Offset(0, 2),
+            // 1. Logo quán ChouxChin dài hơn một chút, tỉ lệ đẹp, ấn vào xem ảnh thương hiệu
+            GestureDetector(
+              onTap: _showBrandLogoDialog,
+              child: Tooltip(
+                message: 'Chạm để xem ảnh logo thương hiệu ChouxChin 💕',
+                child: Container(
+                  height: 48,
+                  width: 68,
+                  padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: isDark ? const Color(0xFF2C2C2E) : Colors.white,
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(
+                      color: isDark ? const Color(0xFF3A3A3C) : const Color(0xFFFFD1DC),
+                      width: 1.5,
                     ),
-                  ],
-                ),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(11),
-                  child: Image.asset(
-                    'assets/images/logo/ChouxChin.png',
-                    fit: BoxFit.contain,
-                    filterQuality: FilterQuality.high,
-                    errorBuilder: (ctx, err, stack) => Container(
-                      color: kRed,
-                      child: const Center(
-                        child: Text('CC',
-                            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                    boxShadow: [
+                      BoxShadow(
+                        color: const Color(0xFFFF4081).withValues(alpha: isDark ? 0.2 : 0.1),
+                        blurRadius: 6,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(11),
+                    child: Image.asset(
+                      'assets/images/logo/ChouxChin.png',
+                      fit: BoxFit.contain,
+                      filterQuality: FilterQuality.high,
+                      errorBuilder: (ctx, err, stack) => Container(
+                        color: kRed,
+                        child: const Center(
+                          child: Text('CC',
+                              style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                        ),
                       ),
                     ),
                   ),
