@@ -1,6 +1,7 @@
 # Build artifacts
 backend_springboot/target/
-frontend_flutter/build/
+frontend_flutter/build/*
+!frontend_flutter/build/web/
 frontend_flutter/.dart_tool/
 frontend_flutter/.pub-cache/
 frontend_flutter/.pub/
