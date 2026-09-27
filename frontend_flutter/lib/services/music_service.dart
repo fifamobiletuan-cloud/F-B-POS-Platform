@@ -16,11 +16,13 @@ class MusicService {
     'audio/nhac6.mp3',
   ];
 
-  final ValueNotifier<bool> isPlayingNotifier = ValueNotifier<bool>(false);
+  // Mặc định luôn là TRUE (luôn phát nhạc khi khách quét mã vào app)
+  final ValueNotifier<bool> isPlayingNotifier = ValueNotifier<bool>(true);
   final ValueNotifier<int> currentTrackIndexNotifier = ValueNotifier<int>(1);
 
   bool _isInitialized = false;
   bool _userExplicitlyMuted = false;
+  bool _audioActuallyPlaying = false;
   int _currentIndex = 0;
 
   Future<void> init() async {
@@ -28,22 +30,28 @@ class MusicService {
     _isInitialized = true;
 
     _player.onPlayerStateChanged.listen((state) {
-      isPlayingNotifier.value = (state == PlayerState.playing);
+      _audioActuallyPlaying = (state == PlayerState.playing);
+      if (_userExplicitlyMuted) {
+        isPlayingNotifier.value = false;
+      } else {
+        isPlayingNotifier.value = true;
+      }
     });
 
-    // Khi phát hết 1 bài, tự động chuyển ngẫu nhiên sang bài khác
+    // Khi phát hết 1 bài, tự động chuyển ngẫu nhiên sang bài khác trong 6 bài
     _player.onPlayerComplete.listen((_) {
-      if (!_userExplicitlyMuted) {
+      if (!_userExplicitlyMuted && isPlayingNotifier.value) {
         playRandom();
       }
     });
 
-    // Chọn ngẫu nhiên 1 trong 6 bài và phát khi mở quán
+    // Chọn ngẫu nhiên 1 trong 6 bài và phát ngay khi mở app
     await playRandom();
   }
 
   /// Phát ngẫu nhiên 1 trong 6 bài nhạc
   Future<void> playRandom() async {
+    if (_userExplicitlyMuted) return;
     try {
       final rand = Random();
       int nextIndex;
@@ -59,28 +67,31 @@ class MusicService {
 
       final trackPath = _tracks[_currentIndex];
       await _player.stop();
-      await _player.setVolume(0.7); // Âm lượng êm dịu chuẩn quán ăn
+      await _player.setVolume(0.7); // Âm lượng êm dịu chuẩn nhà hàng
       await _player.play(AssetSource(trackPath));
+      _audioActuallyPlaying = true;
       isPlayingNotifier.value = true;
-      _userExplicitlyMuted = false;
     } catch (e) {
       if (kDebugMode) {
         print('Music autoplay waiting for user interaction: $e');
       }
-      isPlayingNotifier.value = false;
+      // Không được tắt cờ isPlayingNotifier, vẫn giữ trạng thái BẬT để khách chạm là phát
+      isPlayingNotifier.value = true;
     }
   }
 
   /// Kích hoạt phát nhạc khi người dùng tương tác lần đầu (vượt qua Autoplay Policy của trình duyệt)
   Future<void> triggerOnUserInteraction() async {
-    if (_userExplicitlyMuted) return;
-    if (_player.state != PlayerState.playing) {
+    if (_userExplicitlyMuted || !isPlayingNotifier.value) return;
+    if (!_audioActuallyPlaying) {
       try {
-        await _player.resume();
-        isPlayingNotifier.value = true;
-      } catch (_) {
-        await playRandom();
-      }
+        if (_player.state == PlayerState.paused) {
+          await _player.resume();
+          _audioActuallyPlaying = true;
+        } else {
+          await playRandom();
+        }
+      } catch (_) {}
     }
   }
 
@@ -88,18 +99,22 @@ class MusicService {
   Future<bool> toggleMusic() async {
     try {
       if (isPlayingNotifier.value) {
-        await _player.pause();
+        // Khách chủ động bấm TẮT nhạc
         _userExplicitlyMuted = true;
+        await _player.pause();
+        _audioActuallyPlaying = false;
         isPlayingNotifier.value = false;
         return false;
       } else {
+        // Khách chủ động bấm BẬT lại nhạc
         _userExplicitlyMuted = false;
+        isPlayingNotifier.value = true;
         if (_player.state == PlayerState.paused) {
           await _player.resume();
+          _audioActuallyPlaying = true;
         } else {
           await playRandom();
         }
-        isPlayingNotifier.value = true;
         return true;
       }
     } catch (e) {

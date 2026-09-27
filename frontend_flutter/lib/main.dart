@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'screens/customer_order_screen.dart';
 import 'widgets/floating_food_overlay.dart';
+import 'services/music_service.dart';
 
 // Global ValueNotifier cho Dark/Light Mode
 final ValueNotifier<bool> isDarkModeNotifier = ValueNotifier<bool>(false);
@@ -65,19 +66,25 @@ class RestaurantApp extends StatelessWidget {
           ),
 
           builder: (context, child) {
-            return Stack(
-              children: [
-                ?child,
-                ValueListenableBuilder<bool>(
-                  valueListenable: isFoodOverlayEnabledNotifier,
-                  builder: (context, enabled, _) {
-                    if (!enabled) return const SizedBox.shrink();
-                    return const Positioned.fill(
-                      child: GlobalFloatingFoodOverlay(),
-                    );
-                  },
-                ),
-              ],
+            return Listener(
+              behavior: HitTestBehavior.translucent,
+              onPointerDown: (_) {
+                MusicService.instance.triggerOnUserInteraction();
+              },
+              child: Stack(
+                children: [
+                  ?child,
+                  ValueListenableBuilder<bool>(
+                    valueListenable: isFoodOverlayEnabledNotifier,
+                    builder: (context, enabled, _) {
+                      if (!enabled) return const SizedBox.shrink();
+                      return const Positioned.fill(
+                        child: GlobalFloatingFoodOverlay(),
+                      );
+                    },
+                  ),
+                ],
+              ),
             );
           },
 
