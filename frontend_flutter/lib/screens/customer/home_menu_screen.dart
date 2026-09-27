@@ -454,37 +454,40 @@ class _HomeMenuScreenState extends State<HomeMenuScreen>
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // 1. Logo quán ChouxChin kéo dài (bằng đúng chiều dài khung trước đó, bỏ chữ)
-            Container(
-              height: 46,
-              width: 148,
-              decoration: BoxDecoration(
-                color: isDark ? const Color(0xFF2C2C2E) : Colors.white,
-                borderRadius: BorderRadius.circular(14),
-                border: Border.all(
-                  color: isDark ? const Color(0xFF3A3A3C) : const Color(0xFFE5E5EA),
-                  width: 1,
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.06),
-                    blurRadius: 6,
-                    offset: const Offset(0, 2),
+            // 1. Logo quán ChouxChin tỉ lệ chuẩn 1:1, vừa vặn, sắc nét và siêu xinh
+            Tooltip(
+              message: 'ChouxChin Quán — Chúc bạn ngon miệng! 💕',
+              child: Container(
+                height: 48,
+                width: 48,
+                padding: const EdgeInsets.all(3),
+                decoration: BoxDecoration(
+                  color: isDark ? const Color(0xFF2C2C2E) : Colors.white,
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(
+                    color: isDark ? const Color(0xFF3A3A3C) : const Color(0xFFFFD1DC),
+                    width: 1.5,
                   ),
-                ],
-              ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(13),
-                child: Image.asset(
-                  'assets/images/logo/ChouxChin.png',
-                  width: 148,
-                  height: 46,
-                  fit: BoxFit.fill,
-                  errorBuilder: (ctx, err, stack) => Container(
-                    color: kRed,
-                    child: const Center(
-                      child: Text('ChouxChin',
-                          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color(0xFFFF4081).withValues(alpha: isDark ? 0.2 : 0.1),
+                      blurRadius: 6,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(11),
+                  child: Image.asset(
+                    'assets/images/logo/ChouxChin.png',
+                    fit: BoxFit.contain,
+                    filterQuality: FilterQuality.high,
+                    errorBuilder: (ctx, err, stack) => Container(
+                      color: kRed,
+                      child: const Center(
+                        child: Text('CC',
+                            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                      ),
                     ),
                   ),
                 ),
