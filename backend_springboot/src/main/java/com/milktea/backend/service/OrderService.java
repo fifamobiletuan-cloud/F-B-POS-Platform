@@ -49,7 +49,7 @@ public class OrderService {
                 item.setProductName(itemReq.getProductName());
                 item.setQuantity(itemReq.getQuantity() != null ? itemReq.getQuantity() : 1);
                 item.setUnitPrice(itemReq.getUnitPrice() != null ? itemReq.getUnitPrice() : BigDecimal.ZERO);
-                item.setNote(itemReq.getNote());
+                item.setNote(itemReq.getFullNote() != null && !itemReq.getFullNote().isEmpty() ? itemReq.getFullNote() : itemReq.getNote());
 
                 BigDecimal itemPrice = item.getUnitPrice().multiply(BigDecimal.valueOf(item.getQuantity()));
                 BigDecimal toppingsTotal = BigDecimal.ZERO;
