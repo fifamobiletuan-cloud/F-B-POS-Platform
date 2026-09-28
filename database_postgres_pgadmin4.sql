@@ -31,7 +31,7 @@ CREATE TABLE categories (
 -- 3. BẢNG 2: MÓN ĂN & NƯỚC UỐNG (PRODUCTS - 93 MÓN CHUẨN APP)
 -- ====================================================================
 CREATE TABLE products (
-    id BIGINT PRIMARY KEY,                 -- Trùng khớp 100% ID sản phẩm trên App (1..151)
+    id BIGSERIAL PRIMARY KEY,                -- Tự động tạo sequence products_id_seq, hỗ trợ chèn ID thủ công (1..151)
     category_code VARCHAR(50) NOT NULL REFERENCES categories(code) ON UPDATE CASCADE,
     subcategory VARCHAR(50),                -- Phân nhóm Nước uống: trasua, tradao, tratac, cacao, nuocep
     name VARCHAR(255) NOT NULL,             -- Tên món chính xác
@@ -292,7 +292,7 @@ INSERT INTO products (id, category_code, subcategory, name, base_price, original
 
 
 -- Đồng bộ sequence của bảng products sau khi chèn id thủ công
-SELECT setval('products_id_seq', (SELECT MAX(id) FROM products));
+SELECT setval(pg_get_serial_sequence('products', 'id'), COALESCE((SELECT MAX(id) FROM products), 1));
 
 -- ====================================================================
 -- 16. CHÈN TÀI KHOẢN NHÂN VIÊN & BẾP
