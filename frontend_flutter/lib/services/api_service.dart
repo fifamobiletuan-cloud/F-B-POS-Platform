@@ -6,7 +6,7 @@ import '../models/models.dart';
 String _img(String path) => 'assets/images/$path';
 
 class ApiService {
-  static const String baseUrl = 'http://localhost:8080/api/v1';
+  static const String baseUrl = 'http://localhost:8085/api/v1';
 
   // ─────────────────────────────────────────────────────────
   //  DANH MỤC ĂN VẶT VIỆT NAM — TikTok Shop Style
