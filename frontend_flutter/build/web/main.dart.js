@@ -25626,7 +25626,7 @@ aI9(a){var s=0,r=A.I(t.y),q,p=2,o=[],n,m,l,k,j,i,h,g
 var $async$YO=A.J(function(b,c){if(b===1){o.push(c)
 s=p}for(;;)switch(s){case 0:B.b.lm($.aI8,0,a)
 p=4
-m=A.fV("https://unsigned-design-sensors-schema.trycloudflare.com/api/v1/customer/orders",0,null)
+m=A.fV("https://assurance-lawrence-revised-scientific.trycloudflare.com/api/v1/customer/orders",0,null)
 l=t.N
 k=A.ay(["Content-Type","application/json"],l,l)
 j=a.c
