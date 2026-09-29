@@ -3,6 +3,7 @@ import '../../main.dart';
 import '../../models/models.dart';
 import '../../services/api_service.dart';
 import '../customer_order_screen.dart';
+import '../store_management_screen.dart';
 import 'food_detail_screen.dart';
 import 'cart_screen.dart';
 import '../../widgets/tiktok_lucky_wheel_dialog.dart';
@@ -903,6 +904,58 @@ class _HomeMenuScreenState extends State<HomeMenuScreen>
                     color: isDark ? Colors.amber : const Color(0xFF3C3C43),
                     size: 20,
                   ),
+                ),
+              ),
+            ),
+            const SizedBox(width: 8),
+
+            // 5b. Nút mở App Quán & Màn hình Bếp (Phân hệ 2 của Đề tài)
+            GestureDetector(
+              onTap: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (ctx) => const StoreManagementScreen(),
+                  ),
+                );
+              },
+              child: Container(
+                height: 46,
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: isDark ? const Color(0xFF1E293B) : const Color(0xFFE0F2FE),
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(
+                    color: isDark ? Colors.blue.shade700 : Colors.blue.shade300,
+                    width: 1.2,
+                  ),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.storefront, color: Colors.blueAccent, size: 20),
+                    const SizedBox(width: 5),
+                    Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'App Quán',
+                          style: TextStyle(
+                            fontSize: 11.5,
+                            fontWeight: FontWeight.bold,
+                            color: isDark ? Colors.white : const Color(0xFF0369A1),
+                          ),
+                        ),
+                        Text(
+                          'Bếp & Quản lý',
+                          style: TextStyle(
+                            fontSize: 9.5,
+                            color: isDark ? Colors.white70 : const Color(0xFF0284C7),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
               ),
             ),

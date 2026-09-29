@@ -1713,7 +1713,42 @@ class ApiService {
     }
   }
 
-  static Future<List<OrderModel>> getOrders() async => _mockOrders;
+  static Future<List<OrderModel>> getOrders() async {
+    try {
+      final res = await http.get(Uri.parse('$baseUrl/store/orders'));
+      if (res.statusCode == 200) {
+        final json = jsonDecode(utf8.decode(res.bodyBytes));
+        if (json['success'] == true && json['data'] != null) {
+          final List list = json['data'];
+          final orders = list.map((e) {
+            final List rawItems = e['items'] ?? [];
+            return OrderModel(
+              id: e['orderCode'] ?? e['id'].toString(),
+              tableNumber: e['tableNumber'] ?? 'Bàn 01',
+              totalAmount: (e['finalAmount'] ?? e['totalAmount'] ?? 0).toDouble(),
+              paymentMethod: e['paymentMethod'] ?? 'VietQR',
+              status: e['status'] ?? 'PENDING',
+              createdAt: e['createdAt'] != null ? DateTime.tryParse(e['createdAt']) ?? DateTime.now() : DateTime.now(),
+              items: rawItems.map((it) => OrderItem(
+                productName: it['productName'] ?? '',
+                size: 'M',
+                sugar: '100%',
+                ice: 'Bình thường',
+                toppings: (it['toppings'] as List?)?.map((t) => t['toppingName']?.toString() ?? '').toList() ?? [],
+                quantity: it['quantity'] ?? 1,
+                unitPrice: (it['unitPrice'] ?? 0).toDouble(),
+              )).toList(),
+            );
+          }).toList();
+          if (orders.isNotEmpty) {
+            _mockOrders.clear();
+            _mockOrders.addAll(orders);
+          }
+        }
+      }
+    } catch (_) {}
+    return _mockOrders;
+  }
 
   static Future<void> updateOrderStatus(String id, String newStatus) async {
     try {
@@ -1722,7 +1757,31 @@ class ApiService {
     } catch (_) {}
   }
 
-  static Future<List<ExpenseModel>> getExpenses() async => _mockExpenses;
+  static Future<List<ExpenseModel>> getExpenses() async {
+    try {
+      final res = await http.get(Uri.parse('$baseUrl/reports/profit'));
+      if (res.statusCode == 200) {
+        final json = jsonDecode(utf8.decode(res.bodyBytes));
+        if (json['success'] == true && json['data'] != null && json['data']['expensesList'] != null) {
+          final List list = json['data']['expensesList'];
+          final expenses = list.map((e) => ExpenseModel(
+            id: 'EXP-${e['id']}',
+            title: e['title'] ?? '',
+            amount: (e['amount'] ?? 0).toDouble(),
+            category: e['category'] ?? 'NGUYEN_LIEU',
+            createdAt: DateTime.now(),
+            createdBy: e['createdBy'] ?? 'Admin',
+          )).toList();
+          if (expenses.isNotEmpty) {
+            _mockExpenses.clear();
+            _mockExpenses.addAll(expenses);
+          }
+        }
+      }
+    } catch (_) {}
+    return _mockExpenses;
+  }
+
   static Future<void> addExpense(ExpenseModel expense) async {
     _mockExpenses.insert(0, expense);
   }

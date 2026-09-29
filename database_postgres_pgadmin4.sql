@@ -5,6 +5,8 @@
 -- ====================================================================
 
 -- 1. XÓA CÁC BẢNG CŨ (NẾU CÓ) ĐỂ TẠO MỚI TOÀN BỘ SẠCH SẼ
+DROP TABLE IF EXISTS work_schedules CASCADE;
+DROP TABLE IF EXISTS shifts CASCADE;
 DROP TABLE IF EXISTS order_item_toppings CASCADE;
 DROP TABLE IF EXISTS order_items CASCADE;
 DROP TABLE IF EXISTS orders CASCADE;
@@ -136,6 +138,32 @@ CREATE TABLE users (
     phone VARCHAR(20),
     is_active BOOLEAN DEFAULT TRUE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- ====================================================================
+-- 11. BẢNG 10: DANH MỤC CA LÀM VIỆC (SHIFTS)
+-- ====================================================================
+CREATE TABLE shifts (
+    id SERIAL PRIMARY KEY,
+    shift_name VARCHAR(100) NOT NULL,          -- Ca sáng, Ca chiều, Ca tối
+    start_time TIME NOT NULL,                  -- 07:30:00
+    end_time TIME NOT NULL,                    -- 12:30:00
+    hourly_rate NUMERIC(12, 2) NOT NULL DEFAULT 25000 -- Mức lương: 25.000đ/giờ
+);
+
+-- ====================================================================
+-- 12. BẢNG 11: LỊCH XẾP CA & CHẤM CÔNG NHÂN VIÊN (WORK_SCHEDULES)
+-- ====================================================================
+CREATE TABLE work_schedules (
+    id BIGSERIAL PRIMARY KEY,
+    user_id BIGINT REFERENCES users(id) ON DELETE CASCADE,
+    shift_id INT REFERENCES shifts(id) ON DELETE SET NULL,
+    work_date DATE NOT NULL DEFAULT CURRENT_DATE,
+    check_in TIMESTAMP,
+    check_out TIMESTAMP,
+    total_hours NUMERIC(5, 2) DEFAULT 0,
+    salary_earned NUMERIC(12, 2) DEFAULT 0,
+    status VARCHAR(30) DEFAULT 'SCHEDULED'      -- SCHEDULED, WORKING, COMPLETED, ABSENT
 );
 
 -- ====================================================================
@@ -316,9 +344,29 @@ INSERT INTO order_items (order_id, product_id, product_name, quantity, unit_pric
 (2, 29, 'Tokbokki', 1, 30000, 30000, 'Cay ngọt chuẩn Hàn'),
 (2, 13, 'Trà đào', 1, 15000, 15000, 'Nhiều đá mát lạnh');
 
+-- ====================================================================
+-- 18. CHÈN DANH MỤC CA LÀM VIỆC & LỊCH CHẤM CÔNG (SHIFTS & SCHEDULES)
+-- ====================================================================
+INSERT INTO shifts (shift_name, start_time, end_time, hourly_rate) VALUES
+('Ca sáng', '07:30:00', '12:30:00', 25000),
+('Ca chiều', '12:30:00', '17:30:00', 25000),
+('Ca tối', '17:30:00', '22:30:00', 28000);
+
+INSERT INTO work_schedules (user_id, shift_id, work_date, check_in, check_out, total_hours, salary_earned, status) VALUES
+(2, 1, CURRENT_DATE, CURRENT_DATE + TIME '07:28:00', CURRENT_DATE + TIME '12:32:00', 5.0, 125000, 'COMPLETED'),
+(3, 2, CURRENT_DATE, CURRENT_DATE + TIME '12:30:00', NULL, 0, 0, 'WORKING');
+
+-- ====================================================================
+-- 19. CHÈN DỮ LIỆU SỔ CHI TIÊU HÀNG NGÀY (EXPENSES)
+-- ====================================================================
+INSERT INTO expenses (title, category, amount, note, date) VALUES
+('Mua 5 bao đá lạnh bi', 'Nguyên vật liệu', 100000, 'Đá bi giao ca sáng', CURRENT_DATE),
+('Mua 10 lốc sữa đặc Ông Thọ', 'Nguyên vật liệu', 350000, 'Nhập sỉ đại lý', CURRENT_DATE),
+('Mua 1000 ly nhựa và màng ép dập nắp', 'Vật dụng', 450000, 'Ly 500ml và 700ml', CURRENT_DATE);
+
 -- Cập nhật trạng thái bàn 02 và bàn 05 có khách
 UPDATE dining_tables SET status = 'OCCUPIED' WHERE table_number IN ('Bàn 02', 'Bàn 05');
 
 -- ====================================================================
--- HOÀN TẤT! ĐÃ TẠO TOÀN BỘ 93 SẢN PHẨM TRÙNG KHỚP 100% VỚI APP FLUTTER!
+-- HOÀN TẤT! ĐÃ TẠO TOÀN BỘ 11 BẢNG CHUẨN 100% VỚI BÁO CÁO VÀ APP!
 -- ====================================================================
