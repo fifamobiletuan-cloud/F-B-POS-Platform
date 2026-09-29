@@ -25,6 +25,14 @@ class MusicService {
   bool _audioActuallyPlaying = false;
   int _currentIndex = 0;
 
+  Source _resolveSource(String trackPath) {
+    if (kIsWeb) {
+      // Trên Flutter Web, assets được đóng gói tại assets/assets/
+      return UrlSource('assets/assets/$trackPath');
+    }
+    return AssetSource(trackPath);
+  }
+
   Future<void> init() async {
     if (_isInitialized) return;
     _isInitialized = true;
@@ -45,7 +53,7 @@ class MusicService {
       }
     });
 
-    // Chọn ngẫu nhiên 1 trong 6 bài và phát ngay khi mở app
+    // Thử phát ngẫu nhiên 1 trong 6 bài
     await playRandom();
   }
 
@@ -67,15 +75,15 @@ class MusicService {
 
       final trackPath = _tracks[_currentIndex];
       await _player.stop();
-      await _player.setVolume(0.7); // Âm lượng êm dịu chuẩn nhà hàng
-      await _player.play(AssetSource(trackPath));
+      await _player.setVolume(0.7); // Âm lượng êm dịu chuẩn quán
+      await _player.play(_resolveSource(trackPath));
       _audioActuallyPlaying = true;
       isPlayingNotifier.value = true;
     } catch (e) {
       if (kDebugMode) {
         print('Music autoplay waiting for user interaction: $e');
       }
-      // Không được tắt cờ isPlayingNotifier, vẫn giữ trạng thái BẬT để khách chạm là phát
+      // Giữ cờ true để khi người dùng chạm màn hình là nhạc phát ngay
       isPlayingNotifier.value = true;
     }
   }
@@ -98,7 +106,7 @@ class MusicService {
   /// Bật / Tắt nhạc theo ý muốn của khách hàng
   Future<bool> toggleMusic() async {
     try {
-      if (isPlayingNotifier.value) {
+      if (isPlayingNotifier.value && _audioActuallyPlaying) {
         // Khách chủ động bấm TẮT nhạc
         _userExplicitlyMuted = true;
         await _player.pause();

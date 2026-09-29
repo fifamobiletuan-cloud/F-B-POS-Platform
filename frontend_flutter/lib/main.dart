@@ -13,6 +13,8 @@ final ValueNotifier<bool> isFoodOverlayEnabledNotifier = ValueNotifier<bool>(tru
 final ValueNotifier<List<dynamic>> cartNotifier = ValueNotifier([]);
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
+  MusicService.instance.init();
   runApp(const RestaurantApp());
 }
 
