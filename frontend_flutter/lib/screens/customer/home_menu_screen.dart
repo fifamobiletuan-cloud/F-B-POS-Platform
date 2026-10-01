@@ -6,6 +6,7 @@ import '../customer_order_screen.dart';
 import 'food_detail_screen.dart';
 import 'cart_screen.dart';
 import '../../widgets/tiktok_lucky_wheel_dialog.dart';
+import '../../widgets/minigame/minigame_hub_modal.dart';
 import '../../services/music_service.dart';
 
 // ─────────────────── Định nghĩa danh mục ───────────────────
@@ -119,6 +120,24 @@ class _HomeMenuScreenState extends State<HomeMenuScreen>
       rating: p.rating,
       soldCount: p.soldCount,
     );
+  }
+
+  void _openMinigameHub() async {
+    final shouldOpenWheel = await showDialog<bool>(
+      context: context,
+      barrierDismissible: true,
+      builder: (ctx) => MinigameHubModal(
+        onWonReward: (discount) {
+          setState(() {
+            _wonDiscountPercent = discount;
+          });
+        },
+      ),
+    );
+
+    if (shouldOpenWheel == true && mounted) {
+      _openLuckyWheel();
+    }
   }
 
   void _openLuckyWheel() {
@@ -1199,7 +1218,7 @@ class _HomeMenuScreenState extends State<HomeMenuScreen>
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 14, 16, 0),
       child: GestureDetector(
-        onTap: _openLuckyWheel,
+        onTap: _openMinigameHub,
         child: Container(
           height: 95,
           decoration: BoxDecoration(
@@ -1238,7 +1257,7 @@ class _HomeMenuScreenState extends State<HomeMenuScreen>
                 padding: const EdgeInsets.all(16),
                 child: Row(
                   children: [
-                    Text(hasVoucher ? '🎁' : '🎡', style: const TextStyle(fontSize: 32)),
+                    Text(hasVoucher ? '🎁' : '🎮', style: const TextStyle(fontSize: 32)),
                     const SizedBox(width: 12),
                     Expanded(
                       child: Column(
@@ -1248,7 +1267,7 @@ class _HomeMenuScreenState extends State<HomeMenuScreen>
                           Text(
                             hasVoucher
                                 ? '🎉 Đang áp dụng Voucher -$_wonDiscountPercent%!'
-                                : 'Ưu đãi giảm giá lên đến 50% quay ngayyyy',
+                                : 'Ưu đãi minigame săn voucher lên đến 50%!',
                             style: const TextStyle(
                               color: Colors.white,
                               fontSize: 14,
@@ -1258,8 +1277,8 @@ class _HomeMenuScreenState extends State<HomeMenuScreen>
                           const SizedBox(height: 3),
                           Text(
                             hasVoucher
-                                ? '⚡ Đã giảm giá toàn bộ món ăn'
-                                : '⚡ Vòng quay may mắn nhận voucher khủng',
+                                ? '⚡ Đã giảm giá toàn bộ món ăn (Chạm để chơi)'
+                                : '⚡ Chơi minigame nhận ngay lượt quay may mắn',
                             style: const TextStyle(
                               color: Colors.white70,
                               fontSize: 12,
@@ -1285,15 +1304,15 @@ class _HomeMenuScreenState extends State<HomeMenuScreen>
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Text(
-                            hasVoucher ? 'Quay lại' : 'Quay ngay',
+                            hasVoucher ? 'Chơi lại' : 'Chơi ngay',
                             style: TextStyle(
                               color: hasVoucher ? const Color(0xFFC2185B) : const Color(0xFFE53935),
                               fontSize: 12,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
-                          const SizedBox(width: 3),
-                          const Text('🎡', style: TextStyle(fontSize: 11)),
+                          const SizedBox(width: 4),
+                          const Text('🎮', style: TextStyle(fontSize: 11)),
                         ],
                       ),
                     ),

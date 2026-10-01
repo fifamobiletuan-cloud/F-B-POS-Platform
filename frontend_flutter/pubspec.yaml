@@ -63,6 +63,8 @@ flutter:
   assets:
     # Logo thương hiệu quán
     - assets/images/logo/
+    # Minigame icons & đồ họa ChouxChin
+    - assets/images/minigame/
     # Âm nhạc phát nền ngẫu nhiên
     - assets/audio/
     # Ăn vặt Hàn Quốc
