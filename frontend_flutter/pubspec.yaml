@@ -65,6 +65,9 @@ flutter:
     - assets/images/logo/
     # Minigame icons & đồ họa ChouxChin
     - assets/images/minigame/
+    - assets/images/minigame2/
+    - assets/images/minigame2/game_1_hung_do_an_vat/
+    - assets/images/minigame2/game_2_lat_the_trai_cay/
     # Âm nhạc phát nền ngẫu nhiên
     - assets/audio/
     # Ăn vặt Hàn Quốc

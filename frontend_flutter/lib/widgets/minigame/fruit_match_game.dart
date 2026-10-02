@@ -1,6 +1,23 @@
 import 'dart:async';
-import 'dart:math';
 import 'package:flutter/material.dart';
+
+class FlipCardItem {
+  final int id;
+  final String fruitKey;
+  final String assetPath;
+  final String name;
+  bool isFlipped;
+  bool isMatched;
+
+  FlipCardItem({
+    required this.id,
+    required this.fruitKey,
+    required this.assetPath,
+    required this.name,
+    this.isFlipped = false,
+    this.isMatched = false,
+  });
+}
 
 class FruitMatchGame extends StatefulWidget {
   final VoidCallback onFinishAndOpenWheel;
@@ -16,37 +33,27 @@ class FruitMatchGame extends StatefulWidget {
   State<FruitMatchGame> createState() => _FruitMatchGameState();
 }
 
-class _FruitTile {
-  int type; // 0: Dâu tây, 1: Xoài, 2: Kiwi, 3: Chuối
-
-  _FruitTile({required this.type});
-}
-
 class _FruitMatchGameState extends State<FruitMatchGame> {
-  static const int kRows = 6;
-  static const int kCols = 6;
-  static const int kInitialMoves = 18;
-  static const int _targetStrawberry = 10;
-  static const int _targetKiwi = 10;
-
-  int _movesLeft = kInitialMoves;
-  int _score = 0;
-  int _collectedStrawberry = 0;
-  int _collectedKiwi = 0;
-
-  bool _isGameOver = false;
-  int? _selectedRow;
-  int? _selectedCol;
+  static const int kTotalTime = 90; // 01:30 đếm ngược chuẩn theo ảnh game.png
+  int _timeLeft = kTotalTime;
+  int _matchedPairs = 0;
   bool _isProcessing = false;
+  bool _isGameOver = false;
 
-  final Random _rand = Random();
-  late List<List<_FruitTile>> _grid;
+  Timer? _countdownTimer;
+  List<FlipCardItem> _cards = [];
+  int? _firstSelectedIndex;
 
-  final List<String> _fruitAssets = [
-    'assets/images/minigame/icon_dau_tay.png', // 0: Dâu tây
-    'assets/images/minigame/icon_xoai.png',    // 1: Xoài
-    'assets/images/minigame/icon_kiwi.png',    // 2: Kiwi
-    'assets/images/minigame/icon_chuoi.png',   // 3: Chuối
+  // 8 loại trái cây từ D:\Doantotnghiep\minigame2\game_2_lat_the_trai_cay
+  final List<Map<String, String>> _fruitCatalog = [
+    {'key': 'dau_tay', 'name': 'Dâu tây', 'path': 'assets/images/minigame2/game_2_lat_the_trai_cay/dau_tay_1.jpg'},
+    {'key': 'tao', 'name': 'Táo đỏ', 'path': 'assets/images/minigame2/game_2_lat_the_trai_cay/tao.jpg'},
+    {'key': 'nho_tim', 'name': 'Nho tím', 'path': 'assets/images/minigame2/game_2_lat_the_trai_cay/nho_tim_1.jpg'},
+    {'key': 'chuoi', 'name': 'Chuối', 'path': 'assets/images/minigame2/game_2_lat_the_trai_cay/chuoi.jpg'},
+    {'key': 'cam', 'name': 'Cam tươi', 'path': 'assets/images/minigame2/game_2_lat_the_trai_cay/cam_1.jpg'},
+    {'key': 'dua_hau', 'name': 'Dưa hấu', 'path': 'assets/images/minigame2/game_2_lat_the_trai_cay/dua_hau.jpg'},
+    {'key': 'dua', 'name': 'Dứa', 'path': 'assets/images/minigame2/game_2_lat_the_trai_cay/dua.jpg'},
+    {'key': 'quyt', 'name': 'Quýt ngọt', 'path': 'assets/images/minigame2/game_2_lat_the_trai_cay/quyt.jpg'},
   ];
 
   @override
@@ -56,451 +63,275 @@ class _FruitMatchGameState extends State<FruitMatchGame> {
   }
 
   void _startNewGame() {
-    _movesLeft = kInitialMoves;
-    _score = 0;
-    _collectedStrawberry = 0;
-    _collectedKiwi = 0;
+    _matchedPairs = 0;
+    _timeLeft = kTotalTime;
     _isGameOver = false;
-    _selectedRow = null;
-    _selectedCol = null;
+    _firstSelectedIndex = null;
     _isProcessing = false;
 
-    // Tạo bảng không có sẵn match 3
-    _grid = List.generate(kRows, (r) {
-      return List.generate(kCols, (c) {
-        int t;
-        do {
-          t = _rand.nextInt(_fruitAssets.length);
-        } while ((c >= 2 && _grid[r][c - 1].type == t && _grid[r][c - 2].type == t) ||
-                 (r >= 2 && _grid[r - 1][c].type == t && _grid[r - 2][c].type == t));
-        return _FruitTile(type: t);
+    // Tạo 8 cặp = 16 thẻ bài
+    final List<FlipCardItem> cardList = [];
+    int idCounter = 0;
+    for (final f in _fruitCatalog) {
+      cardList.add(FlipCardItem(
+        id: idCounter++,
+        fruitKey: f['key']!,
+        assetPath: f['path']!,
+        name: f['name']!,
+      ));
+      cardList.add(FlipCardItem(
+        id: idCounter++,
+        fruitKey: f['key']!,
+        assetPath: f['path']!,
+        name: f['name']!,
+      ));
+    }
+
+    // Xáo trộn ngẫu nhiên vị trí
+    cardList.shuffle();
+    _cards = cardList;
+
+    _countdownTimer?.cancel();
+    _countdownTimer = Timer.periodic(const Duration(seconds: 1), (t) {
+      if (!mounted) return;
+      setState(() {
+        if (_timeLeft > 0) {
+          _timeLeft--;
+        } else {
+          _isGameOver = true;
+          _countdownTimer?.cancel();
+        }
       });
     });
 
     setState(() {});
   }
 
-  // Người chơi chạm vào 1 ô trong lưới
-  void _onTileTap(int r, int c) async {
+  void _onCardTap(int index) async {
     if (_isProcessing || _isGameOver) return;
+    final card = _cards[index];
+    if (card.isMatched || card.isFlipped) return;
 
-    if (_selectedRow == null || _selectedCol == null) {
-      // Chọn ô thứ nhất
-      setState(() {
-        _selectedRow = r;
-        _selectedCol = c;
-      });
-      return;
-    }
-
-    final int sr = _selectedRow!;
-    final int sc = _selectedCol!;
-
-    // Chạm lại chính nó -> hủy chọn
-    if (sr == r && sc == c) {
-      setState(() {
-        _selectedRow = null;
-        _selectedCol = null;
-      });
-      return;
-    }
-
-    // Kiểm tra có phải ô liền kề không (trên, dưới, trái, phải)
-    final bool isAdjacent = (sr == r && (sc - c).abs() == 1) || (sc == c && (sr - r).abs() == 1);
-
-    if (!isAdjacent) {
-      // Chọn ô mới
-      setState(() {
-        _selectedRow = r;
-        _selectedCol = c;
-      });
-      return;
-    }
-
-    // Thực hiện tráo đổi (Swap)
-    _isProcessing = true;
     setState(() {
-      _swap(sr, sc, r, c);
-      _selectedRow = null;
-      _selectedCol = null;
+      card.isFlipped = true;
     });
 
-    await Future.delayed(const Duration(milliseconds: 200));
-
-    // Kiểm tra có match không
-    final matches = _findMatches();
-    if (matches.isNotEmpty) {
-      _movesLeft--;
-      await _processMatches(matches);
+    if (_firstSelectedIndex == null) {
+      // Chọn thẻ đầu tiên
+      _firstSelectedIndex = index;
     } else {
-      // Không match -> Đổi lại chỗ cũ
-      setState(() {
-        _swap(sr, sc, r, c);
-      });
-    }
+      // Chọn thẻ thứ hai -> Kiểm tra khớp
+      final firstIndex = _firstSelectedIndex!;
+      final firstCard = _cards[firstIndex];
+      _firstSelectedIndex = null;
+      _isProcessing = true;
 
-    // Kiểm tra hết lượt hoặc thắng
-    if (_movesLeft <= 0 || (_collectedStrawberry >= _targetStrawberry && _collectedKiwi >= _targetKiwi)) {
-      setState(() {
-        _isGameOver = true;
-      });
-    }
+      if (firstCard.fruitKey == card.fruitKey) {
+        // TRÙNG KHỚP! Giữ nguyên thẻ
+        await Future.delayed(const Duration(milliseconds: 300));
+        setState(() {
+          firstCard.isMatched = true;
+          card.isMatched = true;
+          _matchedPairs++;
+          _isProcessing = false;
 
-    _isProcessing = false;
-  }
-
-  void _swap(int r1, int c1, int r2, int c2) {
-    final temp = _grid[r1][c1];
-    _grid[r1][c1] = _grid[r2][c2];
-    _grid[r2][c2] = temp;
-  }
-
-  // Tìm tất cả các cụm Match >= 3
-  Set<Point<int>> _findMatches() {
-    final Set<Point<int>> matches = {};
-
-    // Kiểm tra hàng ngang
-    for (int r = 0; r < kRows; r++) {
-      for (int c = 0; c < kCols - 2; c++) {
-        final t = _grid[r][c].type;
-        if (t != -1 && t == _grid[r][c + 1].type && t == _grid[r][c + 2].type) {
-          matches.add(Point(r, c));
-          matches.add(Point(r, c + 1));
-          matches.add(Point(r, c + 2));
-        }
-      }
-    }
-
-    // Kiểm tra hàng dọc
-    for (int c = 0; c < kCols; c++) {
-      for (int r = 0; r < kRows - 2; r++) {
-        final t = _grid[r][c].type;
-        if (t != -1 && t == _grid[r + 1][c].type && t == _grid[r + 2][c].type) {
-          matches.add(Point(r, c));
-          matches.add(Point(r + 1, c));
-          matches.add(Point(r + 2, c));
-        }
-      }
-    }
-
-    return matches;
-  }
-
-  Future<void> _processMatches(Set<Point<int>> matches) async {
-    while (matches.isNotEmpty) {
-      // Nổ điểm và thu thập mục tiêu
-      for (final p in matches) {
-        final t = _grid[p.x][p.y].type;
-        if (t == 0) _collectedStrawberry++;
-        if (t == 2) _collectedKiwi++;
-        _score += 50;
-      }
-
-      setState(() {
-        for (final p in matches) {
-          _grid[p.x][p.y].type = -1; // Đánh dấu nổ
-        }
-      });
-
-      await Future.delayed(const Duration(milliseconds: 250));
-
-      // Trái cây phía trên rơi xuống (Cascade)
-      setState(() {
-        for (int c = 0; c < kCols; c++) {
-          int writeRow = kRows - 1;
-          for (int r = kRows - 1; r >= 0; r--) {
-            if (_grid[r][c].type != -1) {
-              if (writeRow != r) {
-                _grid[writeRow][c].type = _grid[r][c].type;
-                _grid[r][c].type = -1;
-              }
-              writeRow--;
-            }
+          // Nếu tìm đủ 8/8 cặp -> Thắng cuộc!
+          if (_matchedPairs >= 8) {
+            _isGameOver = true;
+            _countdownTimer?.cancel();
           }
-          // Sinh trái cây mới ở hàng trên
-          for (int r = writeRow; r >= 0; r--) {
-            _grid[r][c].type = _rand.nextInt(_fruitAssets.length);
-          }
+        });
+      } else {
+        // KHÁC NHAU: Đợi 0.8 giây rồi úp lại
+        await Future.delayed(const Duration(milliseconds: 800));
+        if (mounted) {
+          setState(() {
+            firstCard.isFlipped = false;
+            card.isFlipped = false;
+            _isProcessing = false;
+          });
         }
-      });
-
-      await Future.delayed(const Duration(milliseconds: 250));
-      matches = _findMatches(); // Tìm tiếp combo liên hoàn
+      }
     }
+  }
+
+  @override
+  void dispose() {
+    _countdownTimer?.cancel();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Container(
       decoration: const BoxDecoration(
-        color: Color(0xFFE8F5E9), // Xanh pastel ngọt ngào
+        color: Color(0xFFFFF0F5),
         image: DecorationImage(
-          image: AssetImage('assets/images/minigame/fruit_match_preview.jpg'),
+          image: AssetImage('assets/images/minigame2/preview_game2.jpg'),
           fit: BoxFit.cover,
-          opacity: 0.16,
+          opacity: 0.18,
         ),
       ),
       child: SafeArea(
         child: Column(
           children: [
-            // ── TOP BAR: TIÊU ĐỀ + LƯỢT ĐI + ĐIỂM SỐ ──
-            _buildTopBar(),
+            // ── TOP HEADER: HOME + LOGO + TIMER ──
+            _buildTopHeader(),
 
-            // ── KHUNG CHƠI LƯỚI TRÁI CÂY MATCH-3 ──
+            // ── LƯỚI 4x4 = 16 THẺ BÀI TRÁI CÂY ──
             Expanded(
               child: Stack(
                 children: [
                   Center(
                     child: Container(
-                      margin: const EdgeInsets.symmetric(horizontal: 16),
+                      margin: const EdgeInsets.symmetric(horizontal: 14),
                       padding: const EdgeInsets.all(12),
+                      constraints: const BoxConstraints(maxWidth: 480, maxHeight: 480),
                       decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.92),
-                        borderRadius: BorderRadius.circular(24),
-                        border: Border.all(
-                          color: const Color(0xFF81C784),
-                          width: 3,
-                        ),
+                        color: Colors.white.withValues(alpha: 0.85),
+                        borderRadius: BorderRadius.circular(26),
+                        border: Border.all(color: const Color(0xFFFFB6C1), width: 3),
                         boxShadow: const [
-                          BoxShadow(
-                            color: Colors.black12,
-                            blurRadius: 10,
-                            offset: Offset(0, 4),
-                          ),
+                          BoxShadow(color: Colors.black12, blurRadius: 10, offset: Offset(0, 4)),
                         ],
                       ),
-                      child: AspectRatio(
-                        aspectRatio: 1.0,
-                        child: GridView.builder(
-                          physics: const NeverScrollableScrollPhysics(),
-                          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: kCols,
-                            crossAxisSpacing: 6,
-                            mainAxisSpacing: 6,
-                          ),
-                          itemCount: kRows * kCols,
-                          itemBuilder: (context, index) {
-                            final r = index ~/ kCols;
-                            final c = index % kCols;
-                            final tile = _grid[r][c];
-                            final bool isSelected = (_selectedRow == r && _selectedCol == c);
-
-                            if (tile.type == -1) {
-                              return const SizedBox.shrink();
-                            }
-
-                            return GestureDetector(
-                              onTap: () => _onTileTap(r, c),
-                              child: AnimatedContainer(
-                                duration: const Duration(milliseconds: 150),
-                                decoration: BoxDecoration(
-                                  color: isSelected
-                                      ? const Color(0xFFFFF9C4)
-                                      : const Color(0xFFF1F8E9),
-                                  borderRadius: BorderRadius.circular(14),
-                                  border: Border.all(
-                                    color: isSelected
-                                        ? const Color(0xFFFFB300)
-                                        : const Color(0xFFC8E6C9),
-                                    width: isSelected ? 3 : 1.5,
-                                  ),
-                                  boxShadow: isSelected
-                                      ? [
-                                          const BoxShadow(
-                                            color: Color(0x66FFB300),
-                                            blurRadius: 8,
-                                            spreadRadius: 2,
-                                          ),
-                                        ]
-                                      : null,
-                                ),
-                                padding: const EdgeInsets.all(5),
-                                child: Image.asset(
-                                  _fruitAssets[tile.type],
-                                  fit: BoxFit.contain,
-                                ),
-                              ),
-                            );
-                          },
+                      child: GridView.builder(
+                        physics: const NeverScrollableScrollPhysics(),
+                        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 4,
+                          crossAxisSpacing: 8,
+                          mainAxisSpacing: 8,
                         ),
+                        itemCount: _cards.length,
+                        itemBuilder: (context, index) {
+                          final card = _cards[index];
+                          final bool isVisible = card.isFlipped || card.isMatched;
+
+                          return GestureDetector(
+                            onTap: () => _onCardTap(index),
+                            child: AnimatedContainer(
+                              duration: const Duration(milliseconds: 250),
+                              decoration: BoxDecoration(
+                                color: isVisible ? Colors.white : const Color(0xFFFFE4E1),
+                                borderRadius: BorderRadius.circular(16),
+                                border: Border.all(
+                                  color: card.isMatched
+                                      ? const Color(0xFF4CAF50)
+                                      : (isVisible ? const Color(0xFFFF4081) : const Color(0xFFFFB6C1)),
+                                  width: card.isMatched ? 2.5 : 2,
+                                ),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: card.isMatched
+                                        ? const Color(0x334CAF50)
+                                        : Colors.pink.withValues(alpha: 0.15),
+                                    blurRadius: 4,
+                                    offset: const Offset(0, 2),
+                                  ),
+                                ],
+                              ),
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(14),
+                                child: isVisible
+                                    ? Padding(
+                                        padding: const EdgeInsets.all(6),
+                                        child: Image.asset(
+                                          card.assetPath,
+                                          fit: BoxFit.contain,
+                                        ),
+                                      )
+                                    : Image.asset(
+                                        'assets/images/minigame2/card_back.png',
+                                        fit: BoxFit.cover,
+                                        errorBuilder: (_, __, ___) => const Center(
+                                          child: Text('🐻', style: TextStyle(fontSize: 28)),
+                                        ),
+                                      ),
+                              ),
+                            ),
+                          );
+                        },
                       ),
                     ),
                   ),
 
-                  // Màn hình kết thúc hiển thị phần thưởng
+                  // Màn hình kết thúc trò chơi
                   if (_isGameOver) _buildGameOverOverlay(),
                 ],
               ),
             ),
 
-            // ── BOTTOM CONTROLS: MỤC TIÊU THU THẬP + NÚT CHƠI ──
-            _buildBottomTarget(),
+            // ── BOTTOM BAR: CẶP GIỐNG NHAU 0/8 + THỎ CON CHIBI ──
+            _buildBottomBar(),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildTopBar() {
+  Widget _buildTopHeader() {
+    final int min = _timeLeft ~/ 60;
+    final int sec = _timeLeft % 60;
+    final String timeStr = '${min.toString().padLeft(2, '0')}:${sec.toString().padLeft(2, '0')}';
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: Column(
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Row(
-            children: [
-              IconButton(
-                icon: const Icon(Icons.arrow_back_ios_new, color: Color(0xFF2E7D32)),
-                onPressed: widget.onBackToHub,
+          // Nút Home / Quay lại
+          GestureDetector(
+            onTap: widget.onBackToHub,
+            child: Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(
+                color: const Color(0xFFFF4081),
+                shape: BoxShape.circle,
+                border: Border.all(color: Colors.white, width: 2),
+                boxShadow: const [BoxShadow(color: Colors.black26, blurRadius: 4, offset: Offset(0, 2))],
               ),
-              const Expanded(
-                child: Text(
-                  'CHOUXCHIN FRUIT MATCH!',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontFamily: 'Urbanist',
-                    fontSize: 20,
-                    fontWeight: FontWeight.w900,
-                    color: Color(0xFF2E7D32),
-                    letterSpacing: 0.5,
-                  ),
-                ),
-              ),
-              const SizedBox(width: 40),
-            ],
+              child: const Icon(Icons.home_rounded, color: Colors.white, size: 26),
+            ),
           ),
-          const SizedBox(height: 6),
-          // Bảng Lượt di chuyển & Điểm số
-          Row(
-            children: [
-              Expanded(
-                child: Container(
-                  padding: const EdgeInsets.symmetric(vertical: 8),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: const Color(0xFFA5D6A7), width: 2),
-                  ),
-                  child: Column(
-                    children: [
-                      const Text(
-                        'LƯỢT DI CHUYỂN',
-                        style: TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xFF757575),
-                        ),
-                      ),
-                      Text(
-                        '$_movesLeft',
-                        style: TextStyle(
-                          fontSize: 22,
-                          fontWeight: FontWeight.w900,
-                          color: _movesLeft <= 3 ? Colors.red : const Color(0xFF1B5E20),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Container(
-                  padding: const EdgeInsets.symmetric(vertical: 8),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: const Color(0xFFA5D6A7), width: 2),
-                  ),
-                  child: Column(
-                    children: [
-                      const Text(
-                        'ĐIỂM SỐ',
-                        style: TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xFF757575),
-                        ),
-                      ),
-                      Text(
-                        '$_score',
-                        style: const TextStyle(
-                          fontSize: 22,
-                          fontWeight: FontWeight.w900,
-                          color: Color(0xFFE65100),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
 
-  Widget _buildBottomTarget() {
-    return Container(
-      padding: const EdgeInsets.fromLTRB(20, 10, 20, 16),
-      child: Column(
-        children: [
+          // Logo trung tâm: ChouxChin Lật thẻ tìm cặp trái cây
+          Image.asset(
+            'assets/images/minigame2/header_logo.png',
+            height: 62,
+            fit: BoxFit.contain,
+            errorBuilder: (_, __, ___) => const Text(
+              'ChouxChin',
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: Color(0xFFB71C1C)),
+            ),
+          ),
+
+          // Badge Thời gian: 01:30
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
             decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(18),
-              border: Border.all(color: const Color(0xFFC8E6C9), width: 2),
+              color: const Color(0xFFFFEBEE),
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(color: const Color(0xFFFF5252), width: 2),
+              boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 4, offset: Offset(0, 2))],
             ),
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
-                const Text(
-                  'MỤC TIÊU:',
-                  style: TextStyle(
-                    fontWeight: FontWeight.w900,
-                    fontSize: 13,
-                    color: Color(0xFF2E7D32),
-                  ),
-                ),
-                // Mục tiêu Dâu tây
-                Row(
+                const Icon(Icons.alarm, color: Color(0xFFD32F2F), size: 20),
+                const SizedBox(width: 6),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Image.asset(
-                      'assets/images/minigame/icon_dau_tay.png',
-                      width: 26,
-                      height: 26,
+                    const Text(
+                      'Thời gian',
+                      style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: Color(0xFF757575)),
                     ),
-                    const SizedBox(width: 6),
                     Text(
-                      '$_collectedStrawberry/$_targetStrawberry',
+                      timeStr,
                       style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 14,
-                        color: _collectedStrawberry >= _targetStrawberry
-                            ? Colors.green
-                            : Colors.black87,
-                      ),
-                    ),
-                  ],
-                ),
-                // Mục tiêu Kiwi
-                Row(
-                  children: [
-                    Image.asset(
-                      'assets/images/minigame/icon_kiwi.png',
-                      width: 26,
-                      height: 26,
-                    ),
-                    const SizedBox(width: 6),
-                    Text(
-                      '$_collectedKiwi/$_targetKiwi',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 14,
-                        color: _collectedKiwi >= _targetKiwi
-                            ? Colors.green
-                            : Colors.black87,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w900,
+                        color: _timeLeft <= 15 ? Colors.red : const Color(0xFFD32F2F),
                       ),
                     ),
                   ],
@@ -508,13 +339,67 @@ class _FruitMatchGameState extends State<FruitMatchGame> {
               ],
             ),
           ),
-          const SizedBox(height: 6),
-          Text(
-            'Chạm 2 ô cạnh nhau để tráo đổi và nổ 3 trái cây giống nhau',
-            style: TextStyle(
-              fontSize: 11,
-              color: Colors.grey.shade700,
-              fontStyle: FontStyle.italic,
+        ],
+      ),
+    );
+  }
+
+  Widget _buildBottomBar() {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          // Thỏ con dễ thương bên trái
+          Container(
+            padding: const EdgeInsets.all(6),
+            decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
+            child: const Text('🐰', style: TextStyle(fontSize: 26)),
+          ),
+
+          // Badge Đếm cặp giống nhau: 0/8
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+            decoration: BoxDecoration(
+              color: const Color(0xFFFFEBEE),
+              borderRadius: BorderRadius.circular(24),
+              border: Border.all(color: const Color(0xFFFF4081), width: 2),
+              boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 6, offset: Offset(0, 2))],
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.favorite, color: Color(0xFFFE2C55), size: 22),
+                const SizedBox(width: 8),
+                Text(
+                  'Cặp giống nhau: $_matchedPairs/8',
+                  style: const TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w900,
+                    color: Color(0xFFC2185B),
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          // Ly trà sữa bên phải
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+            decoration: BoxDecoration(
+              color: const Color(0xFFFFF3E0),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: const Color(0xFFFFB74D)),
+            ),
+            child: const Row(
+              children: [
+                Text('🧋', style: TextStyle(fontSize: 20)),
+                SizedBox(width: 4),
+                Text(
+                  'Ăn vặt ngon~',
+                  style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Color(0xFFE65100)),
+                ),
+              ],
             ),
           ),
         ],
@@ -523,53 +408,48 @@ class _FruitMatchGameState extends State<FruitMatchGame> {
   }
 
   Widget _buildGameOverOverlay() {
-    final bool isWon =
-        _collectedStrawberry >= _targetStrawberry && _collectedKiwi >= _targetKiwi;
+    final bool isWon = _matchedPairs >= 8;
 
     return Positioned.fill(
       child: Container(
         color: Colors.black54,
         child: Center(
           child: Container(
-            margin: const EdgeInsets.symmetric(horizontal: 28),
+            margin: const EdgeInsets.symmetric(horizontal: 24),
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(28),
-              boxShadow: const [
-                BoxShadow(color: Colors.black26, blurRadius: 16),
-              ],
+              boxShadow: const [BoxShadow(color: Colors.black26, blurRadius: 16)],
             ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text(isWon ? '🏆' : '👏', style: const TextStyle(fontSize: 48)),
+                Text(isWon ? '🏆' : '⏰', style: const TextStyle(fontSize: 48)),
                 const SizedBox(height: 6),
                 Text(
-                  isWon ? 'TUYỆT VỜI! CHIẾN THẮNG!' : 'HOÀN THÀNH LƯỢT CHƠI!',
+                  isWon ? 'TUYỆT VỜI! CHIẾN THẮNG!' : 'HẾT GIỜ RỒI!',
                   textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    fontSize: 20,
+                  style: TextStyle(
+                    fontSize: 22,
                     fontWeight: FontWeight.w900,
-                    color: Color(0xFF2E7D32),
+                    color: isWon ? const Color(0xFF2E7D32) : const Color(0xFFB71C1C),
                   ),
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Tổng điểm đạt được: $_score Điểm!',
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xFFE65100),
-                  ),
+                  isWon
+                      ? 'Bạn đã tìm được đủ 8/8 cặp trái cây!'
+                      : 'Bạn đã tìm được $_matchedPairs/8 cặp trái cây!',
+                  style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Color(0xFFC2185B)),
                 ),
                 const SizedBox(height: 12),
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFE8F5E9),
+                    color: const Color(0xFFFFF0F5),
                     borderRadius: BorderRadius.circular(14),
-                    border: Border.all(color: const Color(0xFFA5D6A7)),
+                    border: Border.all(color: const Color(0xFFFFB6C1)),
                   ),
                   child: const Row(
                     children: [
@@ -578,11 +458,7 @@ class _FruitMatchGameState extends State<FruitMatchGame> {
                       Expanded(
                         child: Text(
                           'Chúc mừng bạn nhận được 1 LƯỢT QUAY GIẢM GIÁ từ quán ChouxChin!',
-                          style: TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.bold,
-                            color: Color(0xFF1B5E20),
-                          ),
+                          style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Color(0xFFC2185B)),
                         ),
                       ),
                     ],
@@ -598,9 +474,7 @@ class _FruitMatchGameState extends State<FruitMatchGame> {
                           foregroundColor: const Color(0xFF757575),
                           side: const BorderSide(color: Color(0xFFBDBDBD)),
                           padding: const EdgeInsets.symmetric(vertical: 12),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                         ),
                         child: const Text('Chơi lại 🔄'),
                       ),
@@ -615,20 +489,12 @@ class _FruitMatchGameState extends State<FruitMatchGame> {
                           foregroundColor: Colors.white,
                           elevation: 4,
                           padding: const EdgeInsets.symmetric(vertical: 12),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                         ),
                         child: const Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Text(
-                              'QUAY NGAY',
-                              style: TextStyle(
-                                fontWeight: FontWeight.w900,
-                                fontSize: 15,
-                              ),
-                            ),
+                            Text('QUAY NGAY', style: TextStyle(fontWeight: FontWeight.w900, fontSize: 15)),
                             SizedBox(width: 6),
                             Text('🎡', style: TextStyle(fontSize: 16)),
                           ],

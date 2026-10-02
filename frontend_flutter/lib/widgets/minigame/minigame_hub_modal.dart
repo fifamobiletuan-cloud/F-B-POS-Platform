@@ -86,7 +86,7 @@ class _MinigameHubModalState extends State<MinigameHubModal> {
             child: Row(
               children: [
                 Image.asset(
-                  'assets/images/minigame/header_logo.png',
+                  'assets/images/minigame2/header_logo.png',
                   height: 48,
                   errorBuilder: (context, error, stackTrace) => const Text('🎮', style: TextStyle(fontSize: 32)),
                 ),
@@ -127,24 +127,24 @@ class _MinigameHubModalState extends State<MinigameHubModal> {
                 final bool isWide = constraints.maxWidth >= 600;
 
                 final card1 = _buildGameChoiceCard(
-                  title: 'CHOUXCHIN SNACK DROP!',
-                  subtitle: 'Trò 1: Hứng Đồ Ăn Rơi 🍬',
-                  desc: 'Kéo giỏ hứng trà sữa, bánh snack, kẹo ngọt rơi xuống để tích điểm trước khi hết giờ!',
-                  previewAsset: 'assets/images/minigame/snack_drop_preview.jpg',
+                  title: 'CHOUXCHIN - CỬA HÀNG ĂN VẶT',
+                  subtitle: 'Trò 1: Hứng Đồ Ăn Vặt Rơi 🍟',
+                  desc: 'Lụm trà sữa, gà rán, khoai tây chiên thật nhanh theo thời gian thực để nhận 1 lượt quay giảm giá!',
+                  previewAsset: 'assets/images/minigame2/preview_game1.jpg',
                   themeColor: const Color(0xFFFE2C55),
                   btnBg: const Color(0xFFFE2C55),
-                  tag: 'HỨNG ĐỒ ĂN',
+                  tag: 'LỤM ĐỒ ĂN',
                   onTap: _openSnackDrop,
                 );
 
                 final card2 = _buildGameChoiceCard(
-                  title: 'CHOUXCHIN FRUIT MATCH!',
-                  subtitle: 'Trò 2: Ghép Trái Cây Candy 🍓',
-                  desc: 'Tráo đổi & nổ 3 trái cây giống nhau để ghi điểm combo và hoàn thành mục tiêu!',
-                  previewAsset: 'assets/images/minigame/fruit_match_preview.jpg',
+                  title: 'CHOUXCHIN - LẬT THẺ TRÁI CÂY',
+                  subtitle: 'Trò 2: Lật Thẻ Tìm Cặp Trái Cây 🍓',
+                  desc: 'Lật và tìm đủ 8 cặp trái cây dâu tây, táo, nho, dưa hấu... giống nhau để mở khóa lượt quay giảm giá!',
+                  previewAsset: 'assets/images/minigame2/preview_game2.jpg',
                   themeColor: const Color(0xFF2E7D32),
                   btnBg: const Color(0xFF2E7D32),
-                  tag: 'GHÉP TRÁI CÂY',
+                  tag: 'LẬT THẺ TÌM CẶP',
                   onTap: _openFruitMatch,
                 );
 
