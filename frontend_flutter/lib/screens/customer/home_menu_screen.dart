@@ -123,6 +123,7 @@ class _HomeMenuScreenState extends State<HomeMenuScreen>
   }
 
   void _openMinigameHub() async {
+    isFoodOverlayEnabledNotifier.value = false; // Tạm dừng hiệu ứng bay nền để game siêu mượt 60 FPS
     final shouldOpenWheel = await showDialog<bool>(
       context: context,
       barrierDismissible: true,
@@ -134,6 +135,7 @@ class _HomeMenuScreenState extends State<HomeMenuScreen>
         },
       ),
     );
+    isFoodOverlayEnabledNotifier.value = true; // Bật lại khi kết thúc game
 
     if (shouldOpenWheel == true && mounted) {
       _openLuckyWheel();

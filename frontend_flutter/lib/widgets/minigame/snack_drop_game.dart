@@ -1,6 +1,6 @@
-import 'dart:async';
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 
 class DropItem {
   double x; // 0.0 -> 1.0
@@ -48,23 +48,26 @@ class SnackDropGame extends StatefulWidget {
   State<SnackDropGame> createState() => _SnackDropGameState();
 }
 
-class _SnackDropGameState extends State<SnackDropGame> {
-  static const int kInitialTime = 45; // 45 giây đếm ngược theo ảnh game.png
-  int _timeLeft = kInitialTime;
-  int _score = 0;
-  int _combo = 1;
+class _SnackDropGameState extends State<SnackDropGame>
+    with SingleTickerProviderStateMixin {
+  static const int kInitialTime = 45; // 45 giây đếm ngược
+  final ValueNotifier<int> _timeLeftNotifier = ValueNotifier<int>(kInitialTime);
+  final ValueNotifier<int> _scoreNotifier = ValueNotifier<int>(0);
+  final ValueNotifier<int> _comboNotifier = ValueNotifier<int>(1);
+  final ValueNotifier<bool> _isGameOverNotifier = ValueNotifier<bool>(false);
+
   bool _isPlaying = true;
   bool _isPaused = false;
+  double _basketX = 0.5;
 
-  double _basketX = 0.5; // Tọa độ rổ hứng (0.0 -> 1.0)
-  Timer? _gameLoopTimer;
-  Timer? _countdownTimer;
+  Ticker? _ticker;
+  Duration _lastDuration = Duration.zero;
+  double _accumulatedSeconds = 0;
 
   final List<DropItem> _activeItems = [];
   final List<FloatingScore> _floatingScores = [];
   final Random _rand = Random();
 
-  // Danh mục 12 món ăn vặt từ D:\Doantotnghiep\minigame2\game_1_hung_do_an_vat
   final List<Map<String, dynamic>> _itemCatalog = [
     {'path': 'assets/images/minigame2/game_1_hung_do_an_vat/tra_sua_1.jpg', 'label': 'Trà sữa', 'pts': 30},
     {'path': 'assets/images/minigame2/game_1_hung_do_an_vat/tra_sua_2.jpg', 'label': 'Trà sữa', 'pts': 30},
@@ -80,6 +83,9 @@ class _SnackDropGameState extends State<SnackDropGame> {
     {'path': 'assets/images/minigame2/game_1_hung_do_an_vat/keo_ngot.jpg', 'label': 'Kẹo ngọt', 'pts': 10},
   ];
 
+  // ValueNotifier dành riêng cho vùng vẽ chuyển động (không rebuild cả màn hình)
+  final ValueNotifier<int> _playfieldTickNotifier = ValueNotifier<int>(0);
+
   @override
   void initState() {
     super.initState();
@@ -87,11 +93,14 @@ class _SnackDropGameState extends State<SnackDropGame> {
   }
 
   void _startNewGame() {
-    _score = 0;
-    _combo = 1;
-    _timeLeft = kInitialTime;
+    _scoreNotifier.value = 0;
+    _comboNotifier.value = 1;
+    _timeLeftNotifier.value = kInitialTime;
+    _isGameOverNotifier.value = false;
     _isPlaying = true;
     _isPaused = false;
+    _basketX = 0.5;
+    _accumulatedSeconds = 0;
     _activeItems.clear();
     _floatingScores.clear();
 
@@ -99,24 +108,9 @@ class _SnackDropGameState extends State<SnackDropGame> {
       _spawnItem(initialY: -0.15 * (i + 1));
     }
 
-    _countdownTimer?.cancel();
-    _countdownTimer = Timer.periodic(const Duration(seconds: 1), (t) {
-      if (!mounted) return;
-      if (_isPaused) return;
-      setState(() {
-        if (_timeLeft > 0) {
-          _timeLeft--;
-        } else {
-          _endGame();
-        }
-      });
-    });
-
-    _gameLoopTimer?.cancel();
-    _gameLoopTimer = Timer.periodic(const Duration(milliseconds: 16), (t) {
-      if (!mounted || !_isPlaying || _isPaused) return;
-      _updatePhysics();
-    });
+    _ticker?.dispose();
+    _lastDuration = Duration.zero;
+    _ticker = createTicker(_onTick)..start();
   }
 
   void _spawnItem({double initialY = -0.06}) {
@@ -131,56 +125,85 @@ class _SnackDropGameState extends State<SnackDropGame> {
     ));
   }
 
-  void _updatePhysics() {
-    setState(() {
-      for (int i = _activeItems.length - 1; i >= 0; i--) {
-        final item = _activeItems[i];
-        item.y += item.speed;
+  void _onTick(Duration elapsed) {
+    if (!mounted || !_isPlaying || _isPaused) return;
 
-        // Va chạm xô hứng (y: 0.76 -> 0.86)
-        if (item.y >= 0.76 && item.y <= 0.86) {
-          if ((item.x - _basketX).abs() < 0.14) {
-            _score += item.points * _combo;
-            _combo = min(_combo + 1, 5);
+    if (_lastDuration == Duration.zero) {
+      _lastDuration = elapsed;
+      return;
+    }
 
-            _floatingScores.add(FloatingScore(
-              x: item.x,
-              y: 0.74,
-              text: '+${item.points * _combo} Pts',
-            ));
+    final double dt = (elapsed - _lastDuration).inMilliseconds / 1000.0;
+    _lastDuration = elapsed;
 
-            _activeItems.removeAt(i);
-            _spawnItem();
-            continue;
-          }
-        }
+    if (dt <= 0 || dt > 0.1) return; // Bảo vệ khi giật frame
 
-        // Rơi khỏi đáy
-        if (item.y > 1.05) {
+    // 1. Đếm ngược giây
+    _accumulatedSeconds += dt;
+    if (_accumulatedSeconds >= 1.0) {
+      _accumulatedSeconds -= 1.0;
+      if (_timeLeftNotifier.value > 0) {
+        _timeLeftNotifier.value--;
+      } else {
+        _endGame();
+        return;
+      }
+    }
+
+    // 2. Cập nhật vật lý rơi đồ ăn
+    final double speedFactor = dt * 60.0;
+    for (int i = _activeItems.length - 1; i >= 0; i--) {
+      final item = _activeItems[i];
+      item.y += item.speed * speedFactor;
+
+      // Bắt va chạm với xô hứng
+      if (item.y >= 0.76 && item.y <= 0.86) {
+        if ((item.x - _basketX).abs() < 0.14) {
+          final pts = item.points * _comboNotifier.value;
+          _scoreNotifier.value += pts;
+          _comboNotifier.value = min(_comboNotifier.value + 1, 5);
+
+          _floatingScores.add(FloatingScore(
+            x: item.x,
+            y: 0.74,
+            text: '+$pts Pts',
+          ));
+
           _activeItems.removeAt(i);
-          _combo = 1; // Hụt đồ ăn, reset combo
           _spawnItem();
+          continue;
         }
       }
 
-      while (_activeItems.length < 4) {
+      // Rơi khỏi đáy
+      if (item.y > 1.05) {
+        _activeItems.removeAt(i);
+        _comboNotifier.value = 1;
         _spawnItem();
       }
+    }
 
-      for (int i = _floatingScores.length - 1; i >= 0; i--) {
-        final fs = _floatingScores[i];
-        fs.opacity -= 0.04;
-        if (fs.opacity <= 0) {
-          _floatingScores.removeAt(i);
-        }
+    while (_activeItems.length < 4) {
+      _spawnItem();
+    }
+
+    // 3. Hiệu ứng điểm nổi
+    for (int i = _floatingScores.length - 1; i >= 0; i--) {
+      final fs = _floatingScores[i];
+      fs.opacity -= 0.035 * speedFactor;
+      if (fs.opacity <= 0) {
+        _floatingScores.removeAt(i);
       }
-    });
+    }
+
+    // Chỉ kích hoạt render lại đúng vùng sân chơi (Playfield)
+    _playfieldTickNotifier.value++;
   }
 
   void _endGame() {
     _isPlaying = false;
-    _gameLoopTimer?.cancel();
-    _countdownTimer?.cancel();
+    _ticker?.stop();
+    _isGameOverNotifier.value = true;
   }
 
   void _togglePause() {
@@ -191,8 +214,12 @@ class _SnackDropGameState extends State<SnackDropGame> {
 
   @override
   void dispose() {
-    _gameLoopTimer?.cancel();
-    _countdownTimer?.cancel();
+    _ticker?.dispose();
+    _timeLeftNotifier.dispose();
+    _scoreNotifier.dispose();
+    _comboNotifier.dispose();
+    _isGameOverNotifier.dispose();
+    _playfieldTickNotifier.dispose();
     super.dispose();
   }
 
@@ -201,144 +228,153 @@ class _SnackDropGameState extends State<SnackDropGame> {
     return Container(
       decoration: const BoxDecoration(
         color: Color(0xFFFFF0F5),
-        image: DecorationImage(
-          image: AssetImage('assets/images/minigame2/preview_game1.jpg'),
-          fit: BoxFit.cover,
-          opacity: 0.22,
-        ),
       ),
       child: SafeArea(
         child: Column(
           children: [
-            // ── TOP HEADER CHUẨN THEO ẢNH GAME.PNG ──
-            _buildTopHeader(),
+            // ── TOP HEADER (Được bọc RepaintBoundary, không bị re-render liên tục) ──
+            RepaintBoundary(
+              child: _buildTopHeader(),
+            ),
 
-            // ── KHU VỰC ĐỒ ĂN RƠI THEO THỜI GIAN THỰC ──
+            // ── SÂN CHƠI GAME RƠI ĐỒ ĂN (TỐI ƯU SIÊU MƯỢT) ──
             Expanded(
-              child: Stack(
-                clipBehavior: Clip.none,
-                children: [
-                  // Biển hiệu gỗ dễ thương bên trái & phải
-                  Positioned(
-                    left: 12,
-                    top: 15,
-                    child: _buildWoodenSign('Lụm đồ ăn\nThật nhanh\nnhé~ ♡'),
-                  ),
-                  Positioned(
-                    right: 12,
-                    bottom: 80,
-                    child: _buildWoodenSign('Ăn vặt\nlà phải\nvui! ♡'),
-                  ),
+              child: RepaintBoundary(
+                child: Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    // Biển hiệu gỗ bên trái & phải
+                    Positioned(
+                      left: 12,
+                      top: 15,
+                      child: _buildWoodenSign('Lụm đồ ăn\nThật nhanh\nnhé~ ♡'),
+                    ),
+                    Positioned(
+                      right: 12,
+                      bottom: 80,
+                      child: _buildWoodenSign('Ăn vặt\nlà phải\nvui! ♡'),
+                    ),
 
-                  // GestureDetector kéo rổ hứng
-                  Positioned.fill(
-                    child: LayoutBuilder(
-                      builder: (context, constraints) {
-                        final w = constraints.maxWidth;
-                        final h = constraints.maxHeight;
+                    // Gesture + Render vật thể chuyển động
+                    Positioned.fill(
+                      child: LayoutBuilder(
+                        builder: (context, constraints) {
+                          final w = constraints.maxWidth;
+                          final h = constraints.maxHeight;
 
-                        return GestureDetector(
-                          behavior: HitTestBehavior.opaque,
-                          onHorizontalDragUpdate: (details) {
-                            if (!_isPlaying || _isPaused) return;
-                            setState(() {
+                          return GestureDetector(
+                            behavior: HitTestBehavior.opaque,
+                            onHorizontalDragUpdate: (details) {
+                              if (!_isPlaying || _isPaused) return;
                               _basketX = (details.localPosition.dx / w).clamp(0.12, 0.88);
-                            });
-                          },
-                          onTapDown: (details) {
-                            if (!_isPlaying || _isPaused) return;
-                            setState(() {
+                              _playfieldTickNotifier.value++;
+                            },
+                            onTapDown: (details) {
+                              if (!_isPlaying || _isPaused) return;
                               _basketX = (details.localPosition.dx / w).clamp(0.12, 0.88);
-                            });
-                          },
-                          child: Stack(
-                            clipBehavior: Clip.none,
-                            children: [
-                              // 1. Các món ăn vặt đang rơi xuống
-                              ..._activeItems.map((item) {
-                                return Positioned(
-                                  left: item.x * w - 28,
-                                  top: item.y * h,
-                                  child: Container(
-                                    decoration: BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color: Colors.pink.withValues(alpha: 0.25),
-                                          blurRadius: 8,
-                                          spreadRadius: 2,
+                              _playfieldTickNotifier.value++;
+                            },
+                            child: AnimatedBuilder(
+                              animation: _playfieldTickNotifier,
+                              builder: (context, _) {
+                                return Stack(
+                                  clipBehavior: Clip.none,
+                                  children: [
+                                    // 1. Đồ ăn rơi
+                                    ..._activeItems.map((item) {
+                                      return Positioned(
+                                        left: item.x * w - 27,
+                                        top: item.y * h,
+                                        child: Container(
+                                          width: 54,
+                                          height: 54,
+                                          decoration: BoxDecoration(
+                                            shape: BoxShape.circle,
+                                            boxShadow: [
+                                              BoxShadow(
+                                                color: Colors.pink.withValues(alpha: 0.2),
+                                                blurRadius: 4,
+                                              ),
+                                            ],
+                                          ),
+                                          child: ClipRRect(
+                                            borderRadius: BorderRadius.circular(27),
+                                            child: Image.asset(
+                                              item.assetPath,
+                                              fit: BoxFit.cover,
+                                              cacheWidth: 110,
+                                              cacheHeight: 110,
+                                            ),
+                                          ),
                                         ),
-                                      ],
-                                    ),
-                                    child: ClipRRect(
-                                      borderRadius: BorderRadius.circular(28),
+                                      );
+                                    }),
+
+                                    // 2. Chữ điểm nổi
+                                    ..._floatingScores.map((fs) {
+                                      return Positioned(
+                                        left: fs.x * w - 30,
+                                        top: fs.y * h - (1.0 - fs.opacity) * 35,
+                                        child: Opacity(
+                                          opacity: fs.opacity.clamp(0.0, 1.0),
+                                          child: Container(
+                                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                                            decoration: BoxDecoration(
+                                              color: const Color(0xFFFE2C55),
+                                              borderRadius: BorderRadius.circular(12),
+                                            ),
+                                            child: Text(
+                                              fs.text,
+                                              style: const TextStyle(
+                                                color: Colors.white,
+                                                fontWeight: FontWeight.w900,
+                                                fontSize: 12,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      );
+                                    }),
+
+                                    // 3. Nhân vật chibi hứng đồ ăn ở đáy
+                                    Positioned(
+                                      left: _basketX * w - 85,
+                                      top: 0.72 * h,
                                       child: Image.asset(
-                                        item.assetPath,
-                                        width: 56,
-                                        height: 56,
-                                        fit: BoxFit.cover,
+                                        'assets/images/minigame2/chibi_catchers.png',
+                                        width: 170,
+                                        height: 125,
+                                        fit: BoxFit.contain,
+                                        cacheWidth: 340,
+                                        errorBuilder: (_, __, ___) => const Text('🧺', style: TextStyle(fontSize: 60)),
                                       ),
                                     ),
-                                  ),
+                                  ],
                                 );
-                              }),
+                              },
+                            ),
+                          );
+                        },
+                      ),
+                    ),
 
-                              // 2. Chữ điểm nổi "+30 Pts"
-                              ..._floatingScores.map((fs) {
-                                return Positioned(
-                                  left: fs.x * w - 30,
-                                  top: fs.y * h - (1.0 - fs.opacity) * 40,
-                                  child: Opacity(
-                                    opacity: fs.opacity.clamp(0.0, 1.0),
-                                    child: Container(
-                                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                                      decoration: BoxDecoration(
-                                        gradient: const LinearGradient(
-                                          colors: [Color(0xFFFF4081), Color(0xFFFE2C55)],
-                                        ),
-                                        borderRadius: BorderRadius.circular(14),
-                                        boxShadow: const [BoxShadow(color: Colors.black26, blurRadius: 4)],
-                                      ),
-                                      child: Text(
-                                        fs.text,
-                                        style: const TextStyle(
-                                          color: Colors.white,
-                                          fontWeight: FontWeight.w900,
-                                          fontSize: 13,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                );
-                              }),
-
-                              // 3. Hai bé chibi cầm xô hứng đồ ăn ở đáy (chibi_catchers.png)
-                              Positioned(
-                                left: _basketX * w - 85,
-                                top: 0.72 * h,
-                                child: Image.asset(
-                                  'assets/images/minigame2/chibi_catchers.png',
-                                  width: 170,
-                                  height: 125,
-                                  fit: BoxFit.contain,
-                                  errorBuilder: (_, __, ___) => const Text('🧺', style: TextStyle(fontSize: 60)),
-                                ),
-                              ),
-                            ],
-                          ),
-                        );
+                    // Màn hình kết thúc trò chơi
+                    ValueListenableBuilder<bool>(
+                      valueListenable: _isGameOverNotifier,
+                      builder: (context, isOver, _) {
+                        if (!isOver) return const SizedBox.shrink();
+                        return _buildGameOverOverlay();
                       },
                     ),
-                  ),
-
-                  // Màn hình kết thúc trò chơi
-                  if (!_isPlaying) _buildGameOverOverlay(),
-                ],
+                  ],
+                ),
               ),
             ),
 
-            // ── BOTTOM BAR: COMBO CHIPS + NÚT TẠM DỪNG ──
-            _buildBottomControls(),
+            // ── BOTTOM CONTROLS ──
+            RepaintBoundary(
+              child: _buildBottomControls(),
+            ),
           ],
         ),
       ),
@@ -346,13 +382,11 @@ class _SnackDropGameState extends State<SnackDropGame> {
   }
 
   Widget _buildTopHeader() {
-    final String timeStr = '00:${_timeLeft.toString().padLeft(2, '0')}';
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          // Nút quay lại & Badge Thời gian
           Row(
             children: [
               IconButton(
@@ -365,7 +399,6 @@ class _SnackDropGameState extends State<SnackDropGame> {
                   color: const Color(0xFFFFEBEE),
                   borderRadius: BorderRadius.circular(20),
                   border: Border.all(color: const Color(0xFFFF5252), width: 2),
-                  boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 4, offset: Offset(0, 2))],
                 ),
                 child: Row(
                   children: [
@@ -378,13 +411,19 @@ class _SnackDropGameState extends State<SnackDropGame> {
                           'Thời gian',
                           style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: Color(0xFF757575)),
                         ),
-                        Text(
-                          timeStr,
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w900,
-                            color: _timeLeft <= 10 ? Colors.red : const Color(0xFFD32F2F),
-                          ),
+                        ValueListenableBuilder<int>(
+                          valueListenable: _timeLeftNotifier,
+                          builder: (context, tLeft, _) {
+                            final timeStr = '00:${tLeft.toString().padLeft(2, '0')}';
+                            return Text(
+                              timeStr,
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w900,
+                                color: tLeft <= 10 ? Colors.red : const Color(0xFFD32F2F),
+                              ),
+                            );
+                          },
                         ),
                       ],
                     ),
@@ -394,25 +433,25 @@ class _SnackDropGameState extends State<SnackDropGame> {
             ],
           ),
 
-          // Logo trung tâm ChouxChin Cửa hàng ăn vặt
+          // Logo trung tâm
           Image.asset(
             'assets/images/minigame2/header_logo.png',
-            height: 62,
+            height: 58,
             fit: BoxFit.contain,
+            cacheHeight: 120,
             errorBuilder: (_, __, ___) => const Text(
               'ChouxChin',
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: Color(0xFFB71C1C)),
             ),
           ),
 
-          // Badge Điểm số
+          // Điểm số
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
             decoration: BoxDecoration(
               color: const Color(0xFFFFEBEE),
               borderRadius: BorderRadius.circular(20),
               border: Border.all(color: const Color(0xFFFF5252), width: 2),
-              boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 4, offset: Offset(0, 2))],
             ),
             child: Row(
               children: [
@@ -425,13 +464,18 @@ class _SnackDropGameState extends State<SnackDropGame> {
                       'Điểm',
                       style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: Color(0xFF757575)),
                     ),
-                    Text(
-                      '$_score',
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w900,
-                        color: Color(0xFFD32F2F),
-                      ),
+                    ValueListenableBuilder<int>(
+                      valueListenable: _scoreNotifier,
+                      builder: (context, sc, _) {
+                        return Text(
+                          '$sc',
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w900,
+                            color: Color(0xFFD32F2F),
+                          ),
+                        );
+                      },
                     ),
                   ],
                 ),
@@ -450,7 +494,6 @@ class _SnackDropGameState extends State<SnackDropGame> {
         color: const Color(0xFFFFF3E0),
         borderRadius: BorderRadius.circular(14),
         border: Border.all(color: const Color(0xFFFFB74D), width: 2),
-        boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 4, offset: Offset(0, 2))],
       ),
       child: Text(
         text,
@@ -471,52 +514,51 @@ class _SnackDropGameState extends State<SnackDropGame> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          // Badge Combo x3
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-            decoration: BoxDecoration(
-              color: const Color(0xFFFFEBEE),
-              borderRadius: BorderRadius.circular(22),
-              border: Border.all(color: const Color(0xFFFF4081), width: 2),
-              boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 4, offset: Offset(0, 2))],
-            ),
-            child: Row(
-              children: [
-                const Text('🍟', style: TextStyle(fontSize: 22)),
-                const SizedBox(width: 6),
-                Text(
-                  'x $_combo Combo',
-                  style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w900,
-                    color: Color(0xFFC2185B),
-                  ),
+          ValueListenableBuilder<int>(
+            valueListenable: _comboNotifier,
+            builder: (context, combo, _) {
+              return Container(
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFFEBEE),
+                  borderRadius: BorderRadius.circular(22),
+                  border: Border.all(color: const Color(0xFFFF4081), width: 2),
                 ),
-              ],
-            ),
+                child: Row(
+                  children: [
+                    const Text('🍟', style: TextStyle(fontSize: 22)),
+                    const SizedBox(width: 6),
+                    Text(
+                      'x $combo Combo',
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w900,
+                        color: Color(0xFFC2185B),
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            },
           ),
-
           const Text(
             'Kéo qua lại để hứng đồ ăn nhé~ ♡',
             style: TextStyle(fontSize: 11, color: Colors.black54, fontStyle: FontStyle.italic),
           ),
-
-          // Nút tạm dừng ⏸
           GestureDetector(
             onTap: _togglePause,
             child: Container(
-              width: 48,
-              height: 48,
+              width: 46,
+              height: 46,
               decoration: BoxDecoration(
                 color: const Color(0xFFFF4081),
                 shape: BoxShape.circle,
                 border: Border.all(color: Colors.white, width: 2.5),
-                boxShadow: const [BoxShadow(color: Colors.black26, blurRadius: 6, offset: Offset(0, 3))],
               ),
               child: Icon(
                 _isPaused ? Icons.play_arrow_rounded : Icons.pause_rounded,
                 color: Colors.white,
-                size: 28,
+                size: 26,
               ),
             ),
           ),
@@ -549,7 +591,7 @@ class _SnackDropGameState extends State<SnackDropGame> {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Bạn đã xuất sắc lụm được: $_score Điểm!',
+                  'Bạn đã xuất sắc lụm được: ${_scoreNotifier.value} Điểm!',
                   style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFFE53935)),
                 ),
                 const SizedBox(height: 12),
