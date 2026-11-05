@@ -1,0 +1,1629 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>CHOUX CHIN F&amp;B - Quản Lý Quán Ăn Vặt Choux Chin</title>
+    <link rel="icon" type="image/x-icon" href="/chouxchin/man/assets/favicon.ico">
+    <link rel="stylesheet" href="/chouxchin/man/css/chouxchin.css?v=20261105_1">
+    <!-- Chart.js Thư viện Biểu đồ -->
+    <script src="/chouxchin/man/js/chart.min.js"></script>
+</head>
+<body>
+
+    <!-- ====================================================================
+         1. TOP GLOBAL NAVBAR (HEADER TRẮNG + MENU PILL XANH DƯƠNG CHUẨN 100%)
+         ==================================================================== -->
+    <header class="kv-header">
+        <div class="kv-header-left">
+            <!-- Logo Thương Hiệu Choux Chin F&B -->
+            <a href="#/DashBoard" class="kv-brand-logo" title="CHOUX CHIN F&amp;B - Hệ Thống Quản Lý">
+                <svg class="kv-brand-icon-svg" viewBox="0 0 32 32" fill="none">
+                    <circle cx="16" cy="16" r="15" fill="#0070F3"/>
+                    <path d="M10 11C10 9.89543 10.8954 9 12 9H20C21.1046 9 22 9.89543 22 11V14C22 17.3137 19.3137 20 16 20C12.6863 20 10 17.3137 10 14V11Z" fill="#FFFFFF"/>
+                    <path d="M16 20V24M12 24H20" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+                <div class="kv-brand-title">
+                    <span>CHOUX CHIN</span>
+                    <span class="kv-brand-fnb-badge">F&amp;B</span>
+                </div>
+            </a>
+
+            <!-- Thanh Menu Pill Bo Tròn Màu Xanh Dương -->
+            <ul class="kv-nav-pill-bar">
+                <li><a href="#/DashBoard" class="kv-nav-pill-item active" data-view="dashboard">Tổng quan</a></li>
+                <li><a href="#/Products" class="kv-nav-pill-item" data-view="products">Thực đơn</a></li>
+                <li class="kv-nav-item-dropdown" id="navDropdownKhoHang">
+                    <a href="#/Inventory" class="kv-nav-pill-item" data-view="inventory" id="navLinkKhoHang">Kho hàng ▾</a>
+                    <div class="kv-mega-dropdown" id="megaMenuKhoHang">
+                        <div class="kv-mega-col">
+                            <div class="kv-mega-col-title">Kho hàng</div>
+                            <a href="#/Inventory?tab=goods" class="kv-mega-link active" data-tab="goods" onclick="switchInventorySubtab('goods')">Danh sách hàng hóa</a>
+                            <a href="#/Inventory?tab=audit" class="kv-mega-link" data-tab="audit" onclick="switchInventorySubtab('audit')">Kiểm kho</a>
+                            <a href="#/Inventory?tab=internal_use" class="kv-mega-link" data-tab="internal_use" onclick="switchInventorySubtab('internal_use')">Xuất dùng nội bộ</a>
+                            <a href="#/Inventory?tab=waste" class="kv-mega-link" data-tab="waste" onclick="switchInventorySubtab('waste')">Xuất hủy</a>
+                        </div>
+                        <div class="kv-mega-divider"></div>
+                        <div class="kv-mega-col">
+                            <div class="kv-mega-col-title">Nhập hàng</div>
+                            <a href="#/Inventory?tab=purchase" class="kv-mega-link" data-tab="purchase" onclick="switchInventorySubtab('purchase')">Nhập hàng</a>
+                            <a href="#/Inventory?tab=invoices" class="kv-mega-link" data-tab="invoices" onclick="switchInventorySubtab('invoices')">Hóa đơn đầu vào</a>
+                            <a href="#/Inventory?tab=returns" class="kv-mega-link" data-tab="returns" onclick="switchInventorySubtab('returns')">Trả hàng nhập</a>
+                            <a href="#/Inventory?tab=suppliers" class="kv-mega-link" data-tab="suppliers" onclick="switchInventorySubtab('suppliers')">Nhà cung cấp</a>
+                        </div>
+                    </div>
+                </li>
+                <li><a href="#/Tables" class="kv-nav-pill-item" data-view="tables">Phòng/Bàn</a></li>
+                <li><a href="#/Invoices" class="kv-nav-pill-item" data-view="invoices">Đơn hàng</a></li>
+                <li><a href="#/Invoices" class="kv-nav-pill-item" data-view="invoices">Khách hàng</a></li>
+                <li><a href="#/Employees" class="kv-nav-pill-item" data-view="employees">Nhân viên</a></li>
+                <li><a href="#/CashFlow" class="kv-nav-pill-item" data-view="cashflow">Sổ quỹ</a></li>
+                <li><a href="#/Reports" class="kv-nav-pill-item" data-view="reports">Báo cáo</a></li>
+                <li><a href="#/DashBoard" class="kv-nav-pill-item" data-view="dashboard">Khác ▾</a></li>
+            </ul>
+        </div>
+
+        <div class="kv-header-right">
+            <!-- Nút Chọn Chi Nhánh (Khớp 100% Ảnh Đính Kèm) -->
+            <div class="kv-pill-store-dropdown" id="branchDropdownContainer" style="position: relative;">
+                <div class="kv-pill-store-btn" id="btnHeaderBranch" onclick="toggleBranchMenu(event)" title="Bấm để chọn chi nhánh làm việc">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="#0070F3"><path d="M20 4H4v2h16V4zm1 10v-2l-1-5H4l-1 5v2h1v6h10v-6h4v6h2v-6h1zm-9 4H6v-4h6v4z"/></svg>
+                    <span id="headerBranchName">Chi nhánh trung tâm</span>
+                    <span style="font-size: 10px; color: #64748B; margin-left: 2px;">▾</span>
+                </div>
+                <!-- Menu xổ xuống chọn chi nhánh -->
+                <div class="kv-branch-menu" id="headerBranchMenu" style="display: none;">
+                    <div class="kv-branch-menu-header">HỆ THỐNG CHI NHÁNH CHOUX CHIN</div>
+                    <a href="javascript:void(0)" class="kv-branch-item active" data-branch="1" onclick="selectBranch('1', 'Chi nhánh trung tâm')">
+                        <span class="branch-icon">🏪</span>
+                        <div class="branch-info">
+                            <strong>Chi nhánh 1 - Trung tâm</strong>
+                            <small>128 Nguyễn Trãi, Q.1 (Đang mở phục vụ)</small>
+                        </div>
+                    </a>
+                    <a href="javascript:void(0)" class="kv-branch-item" data-branch="2" onclick="selectBranch('2', 'Chi nhánh Quận 7')">
+                        <span class="branch-icon">🏪</span>
+                        <div class="branch-info">
+                            <strong>Chi nhánh 2 - Quận 7</strong>
+                            <small>45 Nguyễn Thị Thập, P. Tân Hưng, Q.7</small>
+                        </div>
+                    </a>
+                    <a href="javascript:void(0)" class="kv-branch-item" data-branch="3" onclick="selectBranch('3', 'Chi nhánh Thủ Đức')">
+                        <span class="branch-icon">🏪</span>
+                        <div class="branch-info">
+                            <strong>Chi nhánh 3 - Thủ Đức</strong>
+                            <small>12 Võ Văn Ngân, P. Linh Chiểu, TP. Thủ Đức</small>
+                        </div>
+                    </a>
+                    <a href="javascript:void(0)" class="kv-branch-item" data-branch="4" onclick="selectBranch('4', 'Chi nhánh Bình Thạnh')">
+                        <span class="branch-icon">🏪</span>
+                        <div class="branch-info">
+                            <strong>Chi nhánh 4 - Bình Thạnh</strong>
+                            <small>280 Bạch Đằng, P. 14, Q. Bình Thạnh</small>
+                        </div>
+                    </a>
+                    <div class="kv-branch-divider"></div>
+                    <a href="javascript:void(0)" class="kv-branch-item" data-branch="ALL" onclick="selectBranch('ALL', 'Toàn hệ thống (Tất cả chi nhánh)')">
+                        <span class="branch-icon">🏢</span>
+                        <div class="branch-info">
+                            <strong>Toàn hệ thống (Tất cả chi nhánh)</strong>
+                            <small>Tổng kết hợp nhất doanh thu 4 chi nhánh</small>
+                        </div>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Nút Thu Ngân Bán Hàng -->
+            <a href="#/POS" class="kv-pill-cashier-btn" title="Mở Màn hình Bán hàng Thu ngân">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M20 4H4c-1.11 0-1.99.89-1.99 2L2 18c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/></svg>
+                <span>Thu ngân ▾</span>
+            </a>
+
+            <!-- Nút Màn Hình Bếp (KDS) -->
+            <a href="/chouxchin/kds/" target="_blank" class="kv-pill-cashier-btn" style="background: #16A34A; color: #FFFFFF;" title="Mở Màn hình Bếp (Kitchen Display System)">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M8.1 13.34l2.83-2.83L3.91 3.5a4.008 4.008 0 000 5.66l4.19 4.18zm6.78-1.81c1.53.71 3.68.21 5.27-1.38 1.91-1.91 2.28-4.65.81-6.12-1.46-1.46-4.2-1.1-6.12.81-1.59 1.59-2.09 3.74-1.38 5.27L3.7 19.87l1.41 1.41L12 14.41l6.88 6.88 1.41-1.41L13.41 13l1.47-1.47z"/></svg>
+                <span>Bếp (KDS)</span>
+            </a>
+
+            <!-- Chuông Thông Báo -->
+            <button class="kv-icon-circle-btn" id="btnNotification" title="Thông báo hệ thống">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></svg>
+                <span class="kv-notification-badge" id="activeOrdersBadge"></span>
+            </button>
+
+            <!-- Nút Trợ Giúp -->
+            <button class="kv-icon-circle-btn" title="Trợ giúp &amp; Hướng dẫn">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M11 18h2v-2h-2v2zm1-16C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm0-14c-2.21 0-4 1.79-4 4h2c0-1.1.9-2 2-2s2 .9 2 2c0 2-3 1.75-3 5h2c0-2.25 3-2.5 3-5 0-2.21-1.79-4-4-4z"/></svg>
+            </button>
+
+            <!-- Nút Cài Đặt -->
+            <button class="kv-icon-circle-btn" title="Cấu hình hệ thống">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>
+            </button>
+
+            <!-- Tài khoản Avatar Người dùng -->
+            <button class="kv-icon-circle-btn" style="background: #0070F3; color: #FFFFFF; font-weight: bold; border-color: #0070F3;" title="Nguyễn Huỳnh Anh Tuấn (Admin)">
+                T
+            </button>
+        </div>
+    </header>
+
+    <!-- ====================================================================
+         2. VIEW 1: DASHBOARD CHÍNH (BỨC TRANH KINH DOANH - DỮ LIỆU POSTGRESQL)
+         ==================================================================== -->
+    <main class="cc-container" id="view-dashboard">
+
+        <!-- Tiêu đề trang: Bức tranh kinh doanh & Chọn chi nhánh -->
+        <div class="cc-dashboard-top-row">
+            <h1 class="cc-dashboard-title">Bức tranh kinh doanh</h1>
+            <div class="cc-branch-dropdown" id="dashboardBranchDropdown" onclick="toggleBranchMenu(event)" style="cursor: pointer;" title="Bấm để đổi chi nhánh">
+                <span id="dashboardBranchName">Chi nhánh trung tâm</span>
+                <span style="font-size: 10px; color: #6B7280; margin-left: 2px;">▼</span>
+            </div>
+        </div>
+
+        <!-- Bố Cục 2 Cột: Cột Trái Nội Dung Chính & Cột Phải Sidebar -->
+        <div class="cc-main-grid">
+
+            <!-- ================================================================
+                 CỘT TRÁI (~75% WIDTH): 3 KPI CARDS + 4 KHỐI CHARTS & BẢNG
+                 ================================================================ -->
+            <div class="cc-col-main">
+
+                <!-- Thẻ Tổng Hợp Các Chi Nhánh Khi Chọn "Toàn Hệ Thống" -->
+                <div id="branchesSummaryCard" style="display: none; background: #FFFFFF; border: 1px solid #CBD5E1; border-radius: 8px; padding: 14px 18px; margin-bottom: 16px; box-shadow: 0 2px 6px rgba(0,0,0,0.03);">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <span style="font-size: 18px;">🏢</span>
+                            <strong style="color: #0F172A; font-size: 14px;">Báo cáo Doanh thu Hợp nhất 4 Chi Nhánh Choux Chin</strong>
+                        </div>
+                        <span style="font-size: 11px; background: #E0F2FE; color: #0369A1; padding: 2px 8px; border-radius: 10px; font-weight: 700;">TOÀN HỆ THỐNG</span>
+                    </div>
+                    <div class="kv-table-wrapper" style="border: none;">
+                        <table class="cc-clean-table" style="font-size: 12.5px;">
+                            <thead>
+                                <tr style="background: #F8FAFC;">
+                                    <th>Chi nhánh</th>
+                                    <th>Địa chỉ</th>
+                                    <th>Quản lý</th>
+                                    <th style="text-align: center;">Số đơn</th>
+                                    <th style="text-align: right;">Doanh thu</th>
+                                    <th style="text-align: center;">Thao tác</th>
+                                </tr>
+                            </thead>
+                            <tbody id="branchesSummaryTbody">
+                                <!-- Render tự động -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- ------------------------------------------------------------
+                     KHỐI 1: 3 THẺ KPI (DOANH THU, SỐ LƯỢNG ĐƠN, TỶ LỆ PHỦ BÀN)
+                     ------------------------------------------------------------ -->
+                <div class="cc-kpi-grid">
+                    <!-- Thẻ 1: Doanh thu hôm nay -->
+                    <div class="cc-kpi-card card-blue">
+                        <div>
+                            <div class="cc-kpi-header">
+                                <span>Doanh thu hôm nay</span>
+                                <span class="vat-note">Bao gồm VAT ⓘ</span>
+                            </div>
+                            <div class="cc-kpi-value" id="kpiRevenueVal">0</div>
+                            <div class="cc-kpi-trend trend-down">
+                                <span>100% ↘ So với Hôm qua</span>
+                            </div>
+                        </div>
+                        <div class="cc-kpi-footer-items">
+                            <div>Giảm giá hóa đơn: <strong id="kpiDiscountVal">0</strong></div>
+                            <div>Trả hàng (0): <strong>0</strong></div>
+                        </div>
+                    </div>
+
+                    <!-- Thẻ 2: Số lượng đơn hôm nay -->
+                    <div class="cc-kpi-card card-green">
+                        <div>
+                            <div class="cc-kpi-header">
+                                <span>Số lượng đơn hôm nay</span>
+                            </div>
+                            <div class="cc-kpi-value" id="kpiOrdersVal">0</div>
+                            <div class="cc-kpi-trend trend-down">
+                                <span>100% ↘ So với Hôm qua</span>
+                            </div>
+                        </div>
+                        <div class="cc-kpi-footer-items">
+                            <div>Trung bình đơn: <strong id="kpiAvgBillVal">0</strong></div>
+                            <div>Số khách/đơn: <strong>0 ⓘ</strong></div>
+                        </div>
+                    </div>
+
+                    <!-- Thẻ 3: Tỷ lệ phủ bàn -->
+                    <div class="cc-kpi-card card-yellow">
+                        <div>
+                            <div class="cc-kpi-header">
+                                <span>Tỷ lệ phủ bàn</span>
+                            </div>
+                            <div class="cc-kpi-value" id="kpiTableRateVal">0%</div>
+                            <div class="cc-kpi-trend" style="color: #64748B;">
+                                <span id="kpiTableSubtext">0/12 bàn đang sử dụng</span>
+                            </div>
+                        </div>
+                        <div class="cc-kpi-footer-items">
+                            <div>Đơn đang phục vụ: <strong id="kpiServingOrdersVal">0</strong></div>
+                            <div>Khách đang phục vụ: <strong id="kpiActiveGuests">0</strong></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ------------------------------------------------------------
+                     KHỐI 2: 2 BIỂU ĐỒ SONG SONG (DOANH THU THUẦN & LƯỢNG KHÁCH)
+                     ------------------------------------------------------------ -->
+                <div class="cc-double-chart-grid">
+                    <!-- Chart 1: Doanh thu thuần -->
+                    <div class="cc-card-box">
+                        <div class="cc-card-box-header">
+                            <span class="cc-card-box-title">Doanh thu thuần ⓘ</span>
+                            <select class="cc-time-select">
+                                <option>7 ngày qua</option>
+                                <option>Hôm nay</option>
+                                <option>Tháng này</option>
+                            </select>
+                        </div>
+                        <div class="cc-chart-big-metric">
+                            <span id="dashNetRevenue">0</span>
+                            <span class="sub" id="dashNetBills">(0 hóa đơn)</span>
+                        </div>
+                        <div class="cc-chart-tabs">
+                            <button class="cc-chart-tab" onclick="switchRevenueChartTab('hour', this)">Theo giờ</button>
+                            <button class="cc-chart-tab" onclick="switchRevenueChartTab('day', this)">Theo ngày</button>
+                            <button class="cc-chart-tab active" onclick="switchRevenueChartTab('weekday', this)">Theo thứ</button>
+                        </div>
+                        <div class="cc-chart-container">
+                            <canvas id="revenueNetBarChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Chart 2: Lượng khách hàng -->
+                    <div class="cc-card-box">
+                        <div class="cc-card-box-header">
+                            <span class="cc-card-box-title">Lượng khách hàng</span>
+                            <select class="cc-time-select">
+                                <option>7 ngày qua</option>
+                                <option>Hôm nay</option>
+                                <option>Tháng này</option>
+                            </select>
+                        </div>
+                        <div class="cc-chart-big-metric">
+                            <span id="dashGuestCount">0 lượt khách</span>
+                        </div>
+                        <div class="cc-chart-tabs">
+                            <button class="cc-chart-tab active" onclick="switchCustomerChartTab('hour', this)">Theo giờ</button>
+                            <button class="cc-chart-tab" onclick="switchCustomerChartTab('day', this)">Theo ngày</button>
+                            <button class="cc-chart-tab" onclick="switchCustomerChartTab('weekday', this)">Theo thứ</button>
+                        </div>
+                        <div class="cc-chart-container">
+                            <canvas id="customerSplineChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ------------------------------------------------------------
+                     KHỐI 3: HIỆU QUẢ THỰC ĐƠN (3 BADGES + DONUT + BẢNG TOP 10 TỪ CSDL)
+                     ------------------------------------------------------------ -->
+                <div class="cc-card-box">
+                    <div class="cc-card-box-header">
+                        <span class="cc-card-box-title">Hiệu quả thực đơn</span>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <div style="display: inline-flex; border-radius: 20px; background: #F1F5F9; padding: 2px;">
+                                <button style="background: #0070F3; color: #FFF; border: none; border-radius: 18px; padding: 4px 12px; font-size: 11px; font-weight: 700; cursor: pointer;">Theo nhóm</button>
+                                <button style="background: transparent; color: #64748B; border: none; padding: 4px 12px; font-size: 11px; font-weight: 500; cursor: pointer;">Theo loại</button>
+                            </div>
+                            <select class="cc-time-select">
+                                <option>7 ngày qua</option>
+                                <option>Tháng này</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- 3 Huy hiệu giá trị trung bình món -->
+                    <div class="cc-avg-badges-row">
+                        <div class="cc-avg-item">
+                            <div class="icon">🍴</div>
+                            <div>
+                                <div class="label">Giá trị trung bình/món ⓘ</div>
+                                <div class="value" id="avgItemVal">0</div>
+                            </div>
+                        </div>
+                        <div class="cc-avg-item">
+                            <div class="icon">🍔</div>
+                            <div>
+                                <div class="label">Giá trị trung bình/đồ ăn ⓘ</div>
+                                <div class="value" id="avgFoodVal">0</div>
+                            </div>
+                        </div>
+                        <div class="cc-avg-item">
+                            <div class="icon">🥤</div>
+                            <div>
+                                <div class="label">Giá trị trung bình/đồ uống ⓘ</div>
+                                <div class="value" id="avgDrinkVal">0</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Lưới 2 cột con: Nhóm món (Donut) & Chi tiết từng nhóm món (Table) -->
+                    <div class="cc-menu-sub-grid">
+                        <!-- Cột Donut -->
+                        <div>
+                            <div style="font-weight: 700; font-size: 12px; margin-bottom: 8px; color: #1E293B;">Nhóm món</div>
+                            <div class="cc-chart-container" style="height: 180px;">
+                                <canvas id="menuDonutChart"></canvas>
+                            </div>
+                            <div class="cc-donut-legend" id="menuDonutLegend">
+                                <!-- Render từ CSDL -->
+                            </div>
+                        </div>
+
+                        <!-- Cột Bảng Chi Tiết Món Bán Chạy Từ CSDL -->
+                        <div>
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                <span style="font-weight: 700; font-size: 12px; color: #1E293B;" id="menuTableTitle">Chi tiết từng nhóm món</span>
+                                <select class="cc-time-select" id="selectMenuCategoryFilter" onchange="onCategoryFilterChange(this.value)" style="font-size: 11px; padding: 2px 8px; cursor: pointer;">
+                                    <option value="ALL">Tất cả nhóm ▾</option>
+                                    <option value="NuocUong">Trà sữa &amp; Nước</option>
+                                    <option value="AnVatMan">Ăn vặt mặn</option>
+                                    <option value="DoAnCay">Đồ ăn cay</option>
+                                    <option value="AnVatHanQuoc">Ăn vặt Hàn Quốc</option>
+                                    <option value="MonNoNhe">Món no nhẹ</option>
+                                    <option value="TraiCayChua">Trái cây chua</option>
+                                    <option value="BanhNgot">Bánh ngọt</option>
+                                    <option value="SnackKeo">Snack &amp; Kẹo</option>
+                                </select>
+                            </div>
+                            <table class="cc-clean-table">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 40px;">STT</th>
+                                        <th>Top 10 món bán chạy</th>
+                                        <th style="width: 90px; text-align: center;">Số lượng bán</th>
+                                        <th style="width: 120px; text-align: right;">Doanh thu thuần ⓘ</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="topSellingItemsTbody">
+                                    <!-- Render trực tiếp từ PostgreSQL -->
+                                </tbody>
+                            </table>
+                            <div class="cc-pagination">
+                                <button type="button" class="cc-pagination-btn" id="btnMenuPrevPage" onclick="changeMenuTablePage(-1)" title="Trang trước">&lt;</button>
+                                <button type="button" class="cc-pagination-btn" id="btnMenuNextPage" onclick="changeMenuTablePage(1)" title="Trang sau">&gt;</button>
+                                <span id="topSellingPagination" style="font-weight: 600; color: #475569; margin-left: 4px;">1-5 trong 47</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ------------------------------------------------------------
+                     KHỐI 4: TÌNH TRẠNG HỦY MÓN & THEO DÕI NHÂN VIÊN
+                     ------------------------------------------------------------ -->
+                <div class="cc-split-grid">
+                    <!-- Box 1: Tình trạng hủy món -->
+                    <div class="cc-card-box">
+                        <div class="cc-card-box-header">
+                            <span class="cc-card-box-title">Tình trạng hủy món</span>
+                            <select class="cc-time-select">
+                                <option>7 ngày qua</option>
+                            </select>
+                        </div>
+                        <div class="cc-cancel-summary">
+                            <div class="cc-cancel-summary-col">
+                                <span class="lbl">Món bị hủy</span>
+                                <span class="val" id="cancelItemsCount">0</span>
+                            </div>
+                            <div class="cc-cancel-summary-col">
+                                <span class="lbl">Hóa đơn bị hủy</span>
+                                <span class="val" id="cancelOrdersCount">0</span>
+                            </div>
+                        </div>
+
+                        <!-- Accordion Items -->
+                        <div class="cc-accordion-item">
+                            <div class="cc-accordion-header">
+                                <span><span style="color:#EF4444;">●</span> Hủy sau báo bếp</span>
+                                <span style="color:#64748B;">0 Món ▲</span>
+                            </div>
+                            <div class="cc-accordion-content">
+                                <div style="font-size: 28px; margin-bottom: 4px;">📥</div>
+                                <div>Chưa có món nào bị huỷ</div>
+                            </div>
+                        </div>
+
+                        <div class="cc-accordion-item">
+                            <div class="cc-accordion-header">
+                                <span><span style="color:#F59E0B;">●</span> Hủy sau tạm tính</span>
+                                <span style="color:#64748B;">0 Món ▼</span>
+                            </div>
+                        </div>
+
+                        <div class="cc-accordion-item">
+                            <div class="cc-accordion-header">
+                                <span><span style="color:#FBBF24;">●</span> Hủy khi kiểm đồ</span>
+                                <span style="color:#64748B;">0 Món ▼</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Box 2: Theo dõi nhân viên (100% CSDL POSTGRESQL) -->
+                    <div class="cc-card-box">
+                        <div class="cc-card-box-header">
+                            <div style="display: flex; align-items: center;">
+                                <span class="cc-card-box-title">Theo dõi nhân viên</span>
+                                <span class="cc-badge-sample" style="background:#ECFDF5; color:#10B981;">CSDL Live</span>
+                            </div>
+                            <select class="cc-time-select">
+                                <option>Hôm nay</option>
+                            </select>
+                        </div>
+                        <div class="cc-chart-tabs" style="margin-bottom: 8px;">
+                            <button class="cc-chart-tab active">Chấm công</button>
+                            <button class="cc-chart-tab">Lương nhân viên</button>
+                        </div>
+                        
+                        <!-- 6 Chỉ số chấm công -->
+                        <div class="cc-staff-metrics-grid">
+                            <div class="cc-staff-metric-box">
+                                <div class="lbl">Nhân viên đi làm</div>
+                                <div class="val" id="staffMetricWorking">7</div>
+                            </div>
+                            <div class="cc-staff-metric-box">
+                                <div class="lbl">Nhân viên nghỉ làm</div>
+                                <div class="val" id="staffMetricOff">0</div>
+                            </div>
+                            <div class="cc-staff-metric-box">
+                                <div class="lbl">Yêu cầu chờ duyệt</div>
+                                <div class="val" id="staffMetricPending">0</div>
+                            </div>
+                            <div class="cc-staff-metric-box">
+                                <div class="lbl">Nhân viên đi muộn</div>
+                                <div class="val" id="staffMetricLate">1</div>
+                            </div>
+                            <div class="cc-staff-metric-box">
+                                <div class="lbl">Nhân viên về sớm</div>
+                                <div class="val" id="staffMetricEarly">1</div>
+                            </div>
+                            <div class="cc-staff-metric-box">
+                                <div class="lbl">Nhân viên làm thêm</div>
+                                <div class="val" id="staffMetricOvertime">1</div>
+                            </div>
+                        </div>
+
+                        <!-- Top nhân viên làm nhiều giờ nhất từ CSDL -->
+                        <table class="cc-clean-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 35px;">STT</th>
+                                    <th>Top nhân viên làm nhiều giờ nhất</th>
+                                    <th style="text-align: right;">Số giờ làm</th>
+                                </tr>
+                            </thead>
+                            <tbody id="topStaffTbody">
+                                <!-- Render từ CSDL PostgreSQL -->
+                            </tbody>
+                        </table>
+                        <div style="margin-top: 10px; font-size: 11px;">
+                            <a href="#/Employees" style="color: #0070F3; text-decoration: none;">💡 Quản lý chấm công - tính lương của cửa hàng tại đây</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ------------------------------------------------------------
+                     KHỐI 5: KÊNH BÁN HÀNG (BIỂU ĐỒ SÓNG THEO GIỜ)
+                     ------------------------------------------------------------ -->
+                <div class="cc-card-box">
+                    <div class="cc-card-box-header">
+                        <span class="cc-card-box-title">Kênh bán hàng ⓘ</span>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <select class="cc-time-select">
+                                <option>7 ngày qua</option>
+                            </select>
+                            <span style="font-size: 14px; cursor: pointer; color: #64748B;">📊</span>
+                        </div>
+                    </div>
+                    <div class="cc-chart-tabs">
+                        <button class="cc-chart-tab active">Theo giờ</button>
+                        <button class="cc-chart-tab">Theo ngày</button>
+                        <button class="cc-chart-tab">Theo thứ</button>
+                    </div>
+                    <div class="cc-chart-container" style="height: 200px;">
+                        <canvas id="salesChannelSplineChart"></canvas>
+                    </div>
+                    <div style="display: flex; justify-content: center; align-items: center; gap: 6px; font-size: 11px; margin-top: 6px; color: #64748B;">
+                        <span style="width: 12px; height: 3px; background: #0070F3; display: inline-block;"></span>
+                        <span>Khách đến trực tiếp</span>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- ================================================================
+                 CỘT PHẢI SIDEBAR (~25% WIDTH): DỊCH VỤ NHANH + ADS + HOẠT ĐỘNG
+                 ================================================================ -->
+            <div class="cc-col-sidebar">
+
+                <!-- 1. Dịch Vụ Nhanh (Giao món, Thanh toán, Vay vốn) -->
+                <div class="cc-quick-services-box">
+                    <div class="cc-quick-service-item">
+                        <div class="cc-quick-service-left">
+                            <div class="cc-quick-service-icon">🛵</div>
+                            <div>
+                                <div class="cc-quick-service-title">Giao món siêu tốc</div>
+                                <div class="cc-quick-service-sub">Grab, Ahamove, XanhSM</div>
+                            </div>
+                        </div>
+                        <span style="color:#94A3B8;">&gt;</span>
+                    </div>
+
+                    <div class="cc-quick-service-item">
+                        <div class="cc-quick-service-left">
+                            <div class="cc-quick-service-icon">💳</div>
+                            <div>
+                                <div class="cc-quick-service-title">Thanh toán</div>
+                                <div class="cc-quick-service-sub">Cài đặt QR ting ting miễn phí</div>
+                            </div>
+                        </div>
+                        <span style="color:#94A3B8;">&gt;</span>
+                    </div>
+
+                    <div class="cc-quick-service-item">
+                        <div class="cc-quick-service-left">
+                            <div class="cc-quick-service-icon">💰</div>
+                            <div>
+                                <div class="cc-quick-service-title">Vay vốn</div>
+                                <div class="cc-quick-service-sub">Giải ngân tới 1 tỷ đồng chỉ trong 24H</div>
+                            </div>
+                        </div>
+                        <span style="color:#94A3B8;">&gt;</span>
+                    </div>
+                </div>
+
+                <!-- 2. Green SM Food Banner -->
+                <div class="cc-greensm-banner">
+                    <div class="cc-greensm-header">
+                        <span>CHOUX CHIN</span>
+                        <span>✕</span>
+                        <span>GREEN SM</span>
+                    </div>
+                    <div class="cc-greensm-title">Tích hợp GREEN SM FOOD</div>
+                    <div class="cc-greensm-sub">MỞ RỘNG KÊNH BÁN BÙNG NỔ "BÃO" ĐƠN!</div>
+                </div>
+
+                <!-- 3. Thẻ Khuyến Mại -->
+                <div class="cc-promo-card">
+                    <div>
+                        <span class="cc-promo-tag">Mới</span>
+                        <strong style="color: #1E293B;">Khuyến mại</strong>
+                    </div>
+                    <p style="font-size: 11px; color: #64748B; margin-top: 4px;">Dễ dàng tạo các loại khuyến mại phổ biến nhất</p>
+                    <a href="#/Products" class="cc-promo-link">Xem ngay →</a>
+                </div>
+
+                <!-- 4. Hoạt Động Gần Đây (100% CSDL POSTGRESQL) -->
+                <div class="cc-activity-box">
+                    <h3 class="cc-activity-title">Hoạt động gần đây</h3>
+                    <ul class="cc-activity-list" id="activityFeedList">
+                        <!-- Render trực tiếp từ PostgreSQL -->
+                    </ul>
+                </div>
+
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- ====================================================================
+         3. VIEW 2: THỰC ĐƠN & HÀNG HÓA (`#/Products`)
+         ==================================================================== -->
+    <main class="kv-content-container" id="view-products">
+        <div class="kv-box">
+            <div class="kv-box-header">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <span class="kv-box-title">Thực Đơn 93 Món Ăn Vặt &amp; Trà Sữa Choux Chin</span>
+                    <input type="text" id="inputSearchProduct" placeholder="🔍 Tìm kiếm món theo tên hoặc mã..." class="kv-form-control" style="width: 260px;">
+                    <select id="selectCategoryFilter" class="kv-form-control" style="width: 170px;">
+                        <option value="ALL">Tất cả nhóm món</option>
+                        <option value="AnVatMan">🧂 Ăn vặt mặn</option>
+                        <option value="DoAnCay">🌶️ Đồ ăn cay</option>
+                        <option value="NuocUong">🥤 Nước uống</option>
+                        <option value="BanhNgot">🍰 Bánh &amp; đồ ngọt</option>
+                        <option value="SnackKeo">🍫 Snack &amp; kẹo</option>
+                        <option value="TraiCayChua">🥭 Trái cây &amp; chua</option>
+                        <option value="AnVatHanQuoc">🧀 Ăn vặt Hàn Quốc</option>
+                        <option value="MonNoNhe">🍜 Món no nhẹ</option>
+                    </select>
+                </div>
+                <div>
+                    <button class="kv-btn kv-btn-primary" id="btnOpenAddProduct">+ Thêm món mới</button>
+                </div>
+            </div>
+            <div class="kv-table-wrapper">
+                <table class="kv-data-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 50px;">Mã</th>
+                            <th style="width: 60px;">Ảnh</th>
+                            <th>Tên món ăn vặt / Đồ uống</th>
+                            <th>Nhóm hàng</th>
+                            <th style="text-align: right;">Giá bán</th>
+                            <th style="text-align: right;">Giá gốc</th>
+                            <th style="text-align: center;">Đã bán</th>
+                            <th style="text-align: center;">Trạng thái kinh doanh</th>
+                        </tr>
+                    </thead>
+                    <tbody id="fullProductsTableBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <!-- ====================================================================
+         VIEW KHO HÀNG & NGUYÊN VẬT LIỆU (`#/Inventory`) - 8 PHẦN THEO ẢNH CHUẨN
+         ==================================================================== -->
+    <main class="kv-content-container" id="view-inventory" style="display: none;">
+        <!-- Thanh KPI Thống Kê Nhanh Kho Hàng -->
+        <div class="cc-kpi-grid-3" style="grid-template-columns: repeat(5, 1fr); margin-bottom: 16px;">
+            <div class="cc-kpi-card" style="padding: 12px 16px;">
+                <div class="title">Tổng mặt hàng nguyên liệu</div>
+                <div class="val" id="invKpiTotalIngs" style="font-size: 20px;">34</div>
+                <div class="subtext" style="color:#0070F3;">Đang theo dõi trong kho</div>
+            </div>
+            <div class="cc-kpi-card" style="padding: 12px 16px;">
+                <div class="title">Tổng giá trị tồn kho</div>
+                <div class="val" id="invKpiTotalValue" style="font-size: 20px; color:#10B981;">14.184.450 ₫</div>
+                <div class="subtext">Tính theo giá vốn nhập</div>
+            </div>
+            <div class="cc-kpi-card" style="padding: 12px 16px;">
+                <div class="title">Nguyên liệu sắp hết / thiếu</div>
+                <div class="val" id="invKpiLowStock" style="font-size: 20px; color:#EF4444;">1</div>
+                <div class="subtext" style="color:#EF4444;">Cần tạo phiếu nhập thêm</div>
+            </div>
+            <div class="cc-kpi-card" style="padding: 12px 16px;">
+                <div class="title">Nhà cung cấp đối tác</div>
+                <div class="val" id="invKpiSuppliers" style="font-size: 20px;">6</div>
+                <div class="subtext">Công nợ: 2.700.000 ₫</div>
+            </div>
+            <div class="cc-kpi-card" style="padding: 12px 16px;">
+                <div class="title">Phiếu nhập kho tháng này</div>
+                <div class="val" id="invKpiPurchases" style="font-size: 20px; color:#0070F3;">4</div>
+                <div class="subtext">Tổng nhập: 11.821.000 ₫</div>
+            </div>
+        </div>
+
+        <div class="kv-box">
+            <!-- Thanh Tab Điều Hướng 8 Phân Hệ Kho Hàng Khớp 100% Ảnh Gốc -->
+            <div class="kv-box-header" style="flex-wrap: wrap; gap: 10px; border-bottom: 2px solid #E2E8F0; padding-bottom: 12px;">
+                <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;" id="invSubtabButtons">
+                    <button class="cc-chart-tab active" id="tabBtnInvGoods" onclick="switchInventorySubtab('goods')">📦 Danh sách hàng hóa &amp; Định lượng</button>
+                    <button class="cc-chart-tab" id="tabBtnInvPurchase" onclick="switchInventorySubtab('purchase')">📥 Nhập hàng</button>
+                    <button class="cc-chart-tab" id="tabBtnInvInvoices" onclick="switchInventorySubtab('invoices')">📑 Hóa đơn đầu vào</button>
+                    <button class="cc-chart-tab" id="tabBtnInvAudit" onclick="switchInventorySubtab('audit')">📋 Kiểm kho</button>
+                    <button class="cc-chart-tab" id="tabBtnInvInternal" onclick="switchInventorySubtab('internal_use')">☕ Xuất dùng nội bộ</button>
+                    <button class="cc-chart-tab" id="tabBtnInvWaste" onclick="switchInventorySubtab('waste')">🗑️ Xuất hủy</button>
+                    <button class="cc-chart-tab" id="tabBtnInvReturns" onclick="switchInventorySubtab('returns')">↩️ Trả hàng nhập</button>
+                    <button class="cc-chart-tab" id="tabBtnInvSuppliers" onclick="switchInventorySubtab('suppliers')">🏢 Nhà cung cấp</button>
+                </div>
+                <div>
+                    <button class="kv-btn kv-btn-primary" id="btnInvMainAction" onclick="handleInventoryMainAction()">+ Tạo phiếu nhập hàng</button>
+                </div>
+            </div>
+
+            <!-- ------------------------------------------------------------
+                 PHÂN HỆ 1: DANH SÁCH HÀNG HÓA & ĐỊNH LƯỢNG MÓN ĂN (BOM)
+                 ------------------------------------------------------------ -->
+            <div id="invSubtabGoods" class="inv-subtab-pane active" style="padding-top: 15px;">
+                <!-- Card Món Ăn Đặc Biệt Có 12 Nguyên Liệu Cấu Thành -->
+                <div class="inv-featured-dish-card" id="featuredDishCard">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 12px;">
+                        <div>
+                            <span class="dish-badge-flag">⭐ MÓN ĐẶC BIỆT CÓ 12 NGUYÊN LIỆU ĐỊNH LƯỢNG (BOM)</span>
+                            <h3 style="margin: 8px 0 4px 0; font-size: 18px; color: #1E293B; display: flex; align-items: center; gap: 10px;">
+                                <span>Mẹt Trà Sữa Choux Chin Khổng Lồ Full 12 Topping</span>
+                                <span style="font-size: 14px; font-weight: 700; color: #0070F3; background: #EBF5FF; padding: 3px 12px; border-radius: 20px;">55.000 ₫</span>
+                            </h3>
+                            <p style="font-size: 12.5px; color: #64748B; margin: 0; max-width: 800px; line-height: 1.5;">
+                                Cấu thành từ 12 nguyên liệu: <em>Trà đen Lộc Phát, Trà ô long Đài Loan, Sữa đặc, Sữa tươi Dalat Milk, Bột béo B-One, Sốt đường đen, Trân châu đen Gia Uy, Trân châu 3Q trắng, Thạch củ năng hoa đậu biếc, Pudding trứng, Kem cheese Macchiato, Vụn dừa nướng Bến Tre</em>.
+                            </p>
+                        </div>
+                        <div style="text-align: right;">
+                            <div class="inv-status-pill stocked" style="font-size: 13px;">
+                                ✅ ĐÃ NHẬP ĐỦ TOÀN BỘ 12/12 NGUYÊN LIỆU
+                            </div>
+                            <div style="font-size: 13px; font-weight: 700; color: #10B981; margin-top: 6px;">
+                                Khả năng phục vụ: <span style="font-size: 18px; color: #047857;">150 suất</span> (Đủ hàng bán)
+                            </div>
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 10px; margin-top: 14px;">
+                        <button class="kv-btn kv-btn-default" onclick="openRecipeModal(220)" style="font-size: 12.5px; padding: 6px 16px;">🔍 Xem chi tiết 12 nguyên liệu &amp; định lượng</button>
+                        <button class="kv-btn kv-btn-primary" onclick="openQuickPurchaseModal(220)" style="font-size: 12.5px; padding: 6px 16px;">📥 Nhập bổ sung nguyên liệu cho món này</button>
+                    </div>
+                </div>
+
+                <!-- Chuyển đổi giữa Chế độ Kiểm tra Món ăn (BOM) & Bảng Tồn Kho -->
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 10px;">
+                    <div class="cc-pill-switch">
+                        <button class="cc-pill-switch-btn active" id="btnToggleRecipeView" onclick="switchGoodsSubView('recipes')">🔍 Kiểm tra theo Món ăn (BOM - Đủ bán hay không)</button>
+                        <button class="cc-pill-switch-btn" id="btnToggleIngredientsView" onclick="switchGoodsSubView('ingredients')">📦 Toàn bộ Tồn kho Nguyên vật liệu (34 mặt hàng)</button>
+                    </div>
+                    <div style="display: flex; gap: 8px;">
+                        <input type="text" id="inputSearchInventory" placeholder="🔍 Tìm kiếm món / nguyên liệu..." class="kv-form-control" style="width: 250px;" oninput="handleInventorySearch(this.value)">
+                    </div>
+                </div>
+
+                <!-- Bảng 1A: Kiểm tra Món ăn đã nhập đủ nguyên liệu chưa & Có đủ bán không -->
+                <div id="invRecipesContainer" class="kv-table-wrapper">
+                    <table class="kv-data-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 45px;">STT</th>
+                                <th>Tên món ăn vặt &amp; Trà sữa</th>
+                                <th style="width: 100px; text-align: right;">Giá bán</th>
+                                <th style="width: 120px; text-align: center;">Số nguyên liệu</th>
+                                <th style="width: 160px; text-align: center;">Khả năng phục vụ</th>
+                                <th style="width: 280px; text-align: center;">Tình trạng nhập nguyên liệu &amp; Đủ bán không</th>
+                                <th style="width: 140px; text-align: center;">Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody id="invRecipesTableBody">
+                            <!-- Render từ API /api/v1/inventory/recipes -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Bảng 1B: Tồn kho toàn bộ nguyên vật liệu -->
+                <div id="invIngredientsContainer" class="kv-table-wrapper" style="display: none;">
+                    <table class="kv-data-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 45px;">Mã</th>
+                                <th>Tên nguyên vật liệu</th>
+                                <th>Nhóm hàng</th>
+                                <th style="text-align: center;">Đơn vị</th>
+                                <th style="text-align: right;">Tồn kho hiện tại</th>
+                                <th style="text-align: right;">Tồn tối thiểu</th>
+                                <th style="text-align: right;">Giá vốn nhập (₫)</th>
+                                <th>Nhà cung cấp chính</th>
+                                <th style="text-align: center;">Trạng thái kho</th>
+                            </tr>
+                        </thead>
+                        <tbody id="invIngredientsTableBody">
+                            <!-- Render từ API /api/v1/inventory/ingredients -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- ------------------------------------------------------------
+                 PHÂN HỆ 2: NHẬP HÀNG (PURCHASE ORDERS)
+                 ------------------------------------------------------------ -->
+            <div id="invSubtabPurchase" class="inv-subtab-pane" style="padding-top: 15px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                    <span style="font-weight: 700; color: #1E293B;">Danh sách các phiếu nhập hàng từ nhà cung cấp</span>
+                    <button class="kv-btn kv-btn-primary" onclick="openModal('modalCreatePurchase')">+ Tạo phiếu nhập hàng mới</button>
+                </div>
+                <div class="kv-table-wrapper">
+                    <table class="kv-data-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 130px;">Mã phiếu nhập</th>
+                                <th style="width: 140px;">Ngày nhập hàng</th>
+                                <th>Nhà cung cấp</th>
+                                <th>Người lập phiếu</th>
+                                <th style="text-align: right;">Tổng tiền hàng</th>
+                                <th style="text-align: right;">Đã thanh toán</th>
+                                <th style="text-align: center;">Trạng thái nhập kho</th>
+                                <th style="text-align: center;">Thanh toán</th>
+                                <th style="text-align: center; width: 100px;">Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody id="invPurchaseTableBody">
+                            <!-- Render từ API /api/v1/inventory/purchases -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- ------------------------------------------------------------
+                 PHÂN HỆ 3: HÓA ĐƠN ĐẦU VÀO
+                 ------------------------------------------------------------ -->
+            <div id="invSubtabInvoices" class="inv-subtab-pane" style="padding-top: 15px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                    <span style="font-weight: 700; color: #1E293B;">Hóa đơn VAT và chứng từ mua hàng đầu vào</span>
+                </div>
+                <div class="kv-table-wrapper">
+                    <table class="kv-data-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 130px;">Số hóa đơn VAT</th>
+                                <th style="width: 140px;">Ngày phát hành</th>
+                                <th>Nhà cung cấp xuất HĐ</th>
+                                <th style="width: 130px;">Mã số thuế</th>
+                                <th style="text-align: right;">Tiền hàng chưa thuế</th>
+                                <th style="text-align: right;">Thuế VAT (8%)</th>
+                                <th style="text-align: right;">Tổng thanh toán</th>
+                                <th style="text-align: center;">Trạng thái chứng từ</th>
+                            </tr>
+                        </thead>
+                        <tbody id="invInvoicesTableBody">
+                            <!-- Render từ danh sách phiếu nhập có hóa đơn -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- ------------------------------------------------------------
+                 PHÂN HỆ 4: KIỂM KHO (STOCK AUDITS)
+                 ------------------------------------------------------------ -->
+            <div id="invSubtabAudit" class="inv-subtab-pane" style="padding-top: 15px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                    <span style="font-weight: 700; color: #1E293B;">Lịch sử các đợt kiểm kê và cân bằng tồn kho thực tế</span>
+                    <button class="kv-btn kv-btn-primary" onclick="openModal('modalCreateAudit')">+ Tạo phiếu kiểm kho mới</button>
+                </div>
+                <div class="kv-table-wrapper">
+                    <table class="kv-data-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 140px;">Mã phiếu kiểm</th>
+                                <th style="width: 150px;">Ngày kiểm kê</th>
+                                <th>Người thực hiện kiểm</th>
+                                <th style="text-align: center;">Số mặt hàng kiểm</th>
+                                <th style="text-align: center;">Lệch số lượng</th>
+                                <th style="text-align: right;">Giá trị chênh lệch (₫)</th>
+                                <th style="text-align: center;">Trạng thái cân bằng</th>
+                                <th style="text-align: center; width: 100px;">Chi tiết</th>
+                            </tr>
+                        </thead>
+                        <tbody id="invAuditTableBody">
+                            <!-- Render từ API /api/v1/inventory/audits -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- ------------------------------------------------------------
+                 PHÂN HỆ 5: XUẤT DÙNG NỘI BỘ
+                 ------------------------------------------------------------ -->
+            <div id="invSubtabInternal" class="inv-subtab-pane" style="padding-top: 15px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                    <span style="font-weight: 700; color: #1E293B;">Phiếu xuất nguyên liệu dùng nội bộ (Pha chế thử nghiệm, phục vụ nhân viên)</span>
+                    <button class="kv-btn kv-btn-primary" onclick="openCreateDisposalModal('INTERNAL_USE')">+ Tạo phiếu xuất nội bộ</button>
+                </div>
+                <div class="kv-table-wrapper">
+                    <table class="kv-data-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 140px;">Mã phiếu xuất</th>
+                                <th style="width: 140px;">Ngày xuất</th>
+                                <th>Bộ phận nhận hàng</th>
+                                <th>Người lập phiếu</th>
+                                <th>Mục đích sử dụng</th>
+                                <th style="text-align: right;">Tổng giá trị xuất (₫)</th>
+                                <th style="text-align: center;">Trạng thái</th>
+                            </tr>
+                        </thead>
+                        <tbody id="invInternalTableBody">
+                            <!-- Render từ API /api/v1/inventory/disposals (INTERNAL_USE) -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- ------------------------------------------------------------
+                 PHÂN HỆ 6: XUẤT HỦY (WASTE DISPOSALS)
+                 ------------------------------------------------------------ -->
+            <div id="invSubtabWaste" class="inv-subtab-pane" style="padding-top: 15px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                    <span style="font-weight: 700; color: #1E293B;">Phiếu xuất hủy nguyên liệu (Hết hạn sử dụng, hỏng hóc, đổ vỡ)</span>
+                    <button class="kv-btn" onclick="openCreateDisposalModal('WASTE')" style="background:#EF4444; color:#fff; border:none; padding:6px 14px; border-radius:4px; font-weight:600; cursor:pointer;">+ Tạo phiếu xuất hủy</button>
+                </div>
+                <div class="kv-table-wrapper">
+                    <table class="kv-data-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 140px;">Mã xuất hủy</th>
+                                <th style="width: 140px;">Ngày hủy</th>
+                                <th>Bộ phận phát sinh</th>
+                                <th>Người kiểm tra hủy</th>
+                                <th>Lý do xuất hủy</th>
+                                <th style="text-align: right; color: #EF4444;">Giá trị tổn thất (₫)</th>
+                                <th style="text-align: center;">Trạng thái</th>
+                            </tr>
+                        </thead>
+                        <tbody id="invWasteTableBody">
+                            <!-- Render từ API /api/v1/inventory/disposals (WASTE) -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- ------------------------------------------------------------
+                 PHÂN HỆ 7: TRẢ HÀNG NHẬP
+                 ------------------------------------------------------------ -->
+            <div id="invSubtabReturns" class="inv-subtab-pane" style="padding-top: 15px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                    <span style="font-weight: 700; color: #1E293B;">Phiếu trả hàng và hoàn tiền từ nhà cung cấp</span>
+                </div>
+                <div class="kv-table-wrapper">
+                    <table class="kv-data-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 140px;">Mã trả hàng</th>
+                                <th style="width: 140px;">Ngày trả</th>
+                                <th>Nhà cung cấp nhận lại</th>
+                                <th>Người lập phiếu</th>
+                                <th>Lý do đổi trả</th>
+                                <th style="text-align: right; color: #10B981;">Tiền hoàn trả (₫)</th>
+                                <th style="text-align: center;">Trạng thái</th>
+                            </tr>
+                        </thead>
+                        <tbody id="invReturnsTableBody">
+                            <!-- Render từ API /api/v1/inventory/returns -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- ------------------------------------------------------------
+                 PHÂN HỆ 8: NHÀ CUNG CẤP (SUPPLIERS)
+                 ------------------------------------------------------------ -->
+            <div id="invSubtabSuppliers" class="inv-subtab-pane" style="padding-top: 15px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                    <span style="font-weight: 700; color: #1E293B;">Danh sách 6 Nhà Cung Cấp đối tác chính thức của Choux Chin</span>
+                    <button class="kv-btn kv-btn-primary" onclick="openModal('modalAddSupplier')">+ Thêm nhà cung cấp mới</button>
+                </div>
+                <div class="kv-table-wrapper">
+                    <table class="kv-data-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 90px;">Mã NCC</th>
+                                <th>Tên nhà cung cấp</th>
+                                <th>Người liên hệ</th>
+                                <th>Số điện thoại</th>
+                                <th>Email</th>
+                                <th>Địa chỉ</th>
+                                <th style="text-align: right;">Công nợ hiện tại (₫)</th>
+                                <th style="text-align: right;">Tổng mua tích lũy (₫)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="invSuppliersTableBody">
+                            <!-- Render từ API /api/v1/inventory/suppliers -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- ====================================================================
+         4. VIEW 3: PHÒNG / BÀN ĂN (`#/Tables`)
+         ==================================================================== -->
+    <main class="kv-content-container" id="view-tables">
+        <div class="kv-box">
+            <div class="kv-box-header">
+                <span class="kv-box-title">Sơ đồ 12 Phòng &amp; Bàn Quán Choux Chin</span>
+                <div style="display: flex; gap: 8px;">
+                    <button class="kv-btn kv-btn-default" id="filterTableAll">Tất cả (12)</button>
+                    <button class="kv-btn kv-btn-default" id="filterTableOccupied">Có khách</button>
+                    <button class="kv-btn kv-btn-default" id="filterTableAvailable">Bàn trống</button>
+                </div>
+            </div>
+            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px;" id="fullTablesGrid"></div>
+        </div>
+    </main>
+
+    <!-- ====================================================================
+         5. VIEW 4: ĐƠN HÀNG / HÓA ĐƠN (`#/Invoices`)
+         ==================================================================== -->
+    <main class="kv-content-container" id="view-invoices">
+        <div class="kv-box">
+            <div class="kv-box-header">
+                <span class="kv-box-title">Danh sách Hóa Đơn Bán Hàng &amp; Lịch Sử Gọi Món</span>
+                <input type="text" id="inputSearchInvoice" placeholder="Mã đơn (CC-...), Số bàn..." class="kv-form-control" style="width: 220px;">
+            </div>
+            <div class="kv-table-wrapper">
+                <table class="kv-data-table">
+                    <thead>
+                        <tr>
+                            <th>Mã đơn</th>
+                            <th>Thời gian</th>
+                            <th>Bàn ăn</th>
+                            <th>Món gọi</th>
+                            <th style="text-align: right;">Tổng tiền</th>
+                            <th style="text-align: right;">Giảm giá</th>
+                            <th style="text-align: right;">Khách trả</th>
+                            <th>Phương thức</th>
+                            <th style="text-align: center;">Trạng thái</th>
+                            <th style="text-align: center;">Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody id="invoicesTableBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <!-- ====================================================================
+         6. VIEW 5: SỔ QUỸ & THU CHI (`#/CashFlow`)
+         ==================================================================== -->
+    <main class="kv-content-container" id="view-cashflow">
+        <div class="kv-box">
+            <div class="kv-box-header">
+                <span class="kv-box-title">Sổ Quỹ Tiền Mặt &amp; Quản Lý Chi Phí Hàng Ngày</span>
+                <button class="kv-btn kv-btn-danger" id="btnOpenAddExpense">+ Lập phiếu chi tiền</button>
+            </div>
+            <div class="kv-table-wrapper">
+                <table class="kv-data-table">
+                    <thead>
+                        <tr>
+                            <th>Mã phiếu</th>
+                            <th>Ngày ghi</th>
+                            <th>Nội dung chi tiêu</th>
+                            <th>Danh mục chi</th>
+                            <th>Ghi chú / Chứng từ</th>
+                            <th>Người lập phiếu</th>
+                            <th style="text-align: right;">Số tiền chi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="expensesTableBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <!-- ====================================================================
+         7. VIEW 6: NHÂN VIÊN & CHẤM CÔNG (100% CSDL POSTGRESQL `employees`)
+         ==================================================================== -->
+    <main class="kv-content-container" id="view-employees">
+        <div class="kv-box">
+            <div class="kv-box-header">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <span class="kv-box-title">Danh Sách Nhân Viên &amp; Phân Ca Quán Choux Chin</span>
+                    <input type="text" id="inputSearchEmployee" placeholder="Tìm kiếm nhân viên..." class="kv-form-control" style="width: 220px;">
+                </div>
+                <div style="display: flex; gap: 8px;">
+                    <button class="kv-btn kv-btn-primary" id="btnOpenAddEmployee">+ Thêm nhân viên mới</button>
+                    <button class="kv-btn kv-btn-success" id="btnCheckInNow">✓ Chấm công vào ca</button>
+                </div>
+            </div>
+
+            <!-- 3 Khối Ca Trực -->
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 20px;">
+                <div style="background: #F8FAFD; border: 1px solid var(--cc-border); border-radius: 6px; padding: 14px;">
+                    <h4 style="color: #0070F3; margin-bottom: 6px;">🌅 Ca sáng (07:30 - 12:30)</h4>
+                    <p style="font-size: 12px; color: #64748B;">Lương: 25.000 đ/giờ • Phục vụ &amp; Pha chế</p>
+                </div>
+                <div style="background: #F8FAFD; border: 1px solid var(--cc-border); border-radius: 6px; padding: 14px;">
+                    <h4 style="color: #FF8A00; margin-bottom: 6px;">☀️ Ca chiều (12:30 - 17:30)</h4>
+                    <p style="font-size: 12px; color: #64748B;">Lương: 25.000 đ/giờ • Giờ cao điểm học sinh</p>
+                </div>
+                <div style="background: #F8FAFD; border: 1px solid var(--cc-border); border-radius: 6px; padding: 14px;">
+                    <h4 style="color: #8E44AD; margin-bottom: 6px;">🌙 Ca tối (17:30 - 22:30)</h4>
+                    <p style="font-size: 12px; color: #64748B;">Lương: 28.000 đ/giờ • Ăn vặt tối &amp; Trà sữa</p>
+                </div>
+            </div>
+
+            <!-- Bảng Danh Sách Nhân Viên Thực Tế Từ PostgreSQL -->
+            <div class="kv-table-wrapper">
+                <table class="kv-data-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 80px;">Mã NV</th>
+                            <th>Họ và tên</th>
+                            <th>Chức vụ / Vị trí</th>
+                            <th>Số điện thoại</th>
+                            <th>Email</th>
+                            <th>Ca làm việc</th>
+                            <th style="text-align: right;">Mức lương / giờ</th>
+                            <th style="text-align: center;">Trạng thái</th>
+                            <th style="text-align: center; width: 80px;">Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody id="employeesTableBody">
+                        <!-- Render từ CSDL PostgreSQL -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <!-- ====================================================================
+         8. VIEW 7: BÁO CÁO KINH DOANH (`#/Reports`)
+         ==================================================================== -->
+    <main class="kv-content-container" id="view-reports">
+        <div class="kv-box">
+            <div class="kv-box-header">
+                <span class="kv-box-title">Báo Cáo Tài Chính &amp; Phân Tích Lợi Nhuận Quán Choux Chin</span>
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                <div>
+                    <h4 style="margin-bottom: 12px; color: #1E293B;">Kết cấu Doanh thu theo Nhóm Món Ăn</h4>
+                    <div class="cc-chart-container" style="height: 260px;">
+                        <canvas id="categoryChart"></canvas>
+                    </div>
+                </div>
+                <div>
+                    <h4 style="margin-bottom: 12px; color: #1E293B;">Bảng tổng hợp Lãi Lỗ thực tế</h4>
+                    <div style="background: #F8FAFD; border: 1px solid var(--cc-border); border-radius: 6px; padding: 18px; font-size: 13px;">
+                        <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px dashed var(--cc-border);">
+                            <span>(+) Tổng Doanh Thu Bán Hàng:</span>
+                            <strong style="color: #0070F3;" id="repRevenue">0 ₫</strong>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px dashed var(--cc-border);">
+                            <span>(-) Chi Phí Mua Nguyên Liệu &amp; Vận Hành:</span>
+                            <strong style="color: #EF4444;" id="repExpense">0 ₫</strong>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; padding: 12px 0 0; font-size: 15px;">
+                            <span>(=) LỢI NHUẬN RÒNG THỰC TẾ:</span>
+                            <strong style="color: #10B981;" id="repNetProfit">0 ₫</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- ====================================================================
+         9. VIEW 8: MÀN HÌNH BÁN HÀNG POS THU NGÂN (`#/POS`)
+         ==================================================================== -->
+    <main class="kv-content-container" id="view-pos">
+        <div style="display: grid; grid-template-columns: 1fr 380px; gap: 16px;">
+            <div class="kv-box" style="margin-bottom: 0;">
+                <div class="kv-box-header">
+                    <span class="kv-box-title">Thực đơn Gọi Món POS Thu Ngân</span>
+                    <input type="text" id="posSearch" placeholder="Tìm kiếm món ăn vặt..." class="kv-form-control" style="width: 220px;">
+                </div>
+                <div style="max-height: 70vh; overflow-y: auto;">
+                    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px;" id="posProductGrid"></div>
+                </div>
+            </div>
+
+            <div class="kv-box" style="margin-bottom: 0; display: flex; flex-direction: column;">
+                <div class="kv-box-header" style="background-color: #0070F3; color: #FFFFFF;">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <span>Bàn:</span>
+                        <select id="posTableSelect" class="kv-form-control" style="width: 120px; padding: 3px 6px; background: #FFF; color: #000; font-weight: bold;">
+                            <option value="Bàn 01">Bàn 01</option>
+                            <option value="Bàn 02">Bàn 02</option>
+                            <option value="Bàn 03">Bàn 03</option>
+                            <option value="Bàn 04">Bàn 04</option>
+                            <option value="Bàn 05">Bàn 05</option>
+                            <option value="Bàn 06">Bàn 06</option>
+                            <option value="Bàn 07">Bàn 07</option>
+                            <option value="Bàn 08">Bàn 08</option>
+                            <option value="Bàn 09">Bàn 09</option>
+                            <option value="Bàn 10">Bàn 10</option>
+                            <option value="Bàn 11">Bàn 11</option>
+                            <option value="Bàn 12">Bàn 12</option>
+                        </select>
+                    </div>
+                    <button class="kv-btn kv-btn-default" id="posClearCart" style="padding: 2px 8px; font-size: 11px;">Xóa đơn</button>
+                </div>
+                <div style="flex: 1; max-height: 48vh; overflow-y: auto; padding: 8px;" id="posCartItemsList">
+                    <p style="text-align: center; color: #64748B; margin-top: 40px;">Chưa chọn món nào</p>
+                </div>
+                <div style="padding: 14px; border-top: 1px solid var(--cc-border); background: #F8FAFD;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                        <span>Tổng tiền món:</span>
+                        <strong id="posCartSubtotal">0 ₫</strong>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; font-size: 16px; font-weight: bold; color: #0070F3; margin-bottom: 12px;">
+                        <span>Khách phải trả:</span>
+                        <span id="posCartFinal">0 ₫</span>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                        <button class="kv-btn kv-btn-primary" id="btnPosPayVietQR">VietQR</button>
+                        <button class="kv-btn kv-btn-success" id="btnPosPayCash">Tiền mặt</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- ====================================================================
+         10. THANH CẢNH BÁO DƯỚI ĐÁY & NÚT NỔI FLOATING ACTIONS
+         ==================================================================== -->
+    <div class="kv-bottom-banner">
+        <span>⚠️ Bạn đang sử dụng hệ thống CHOUX CHIN F&amp;B bản Pro kết nối CSDL PostgreSQL. <a href="#">Xem chi tiết</a></span>
+    </div>
+
+    <div class="cc-floating-actions">
+        <button class="cc-float-btn" onclick="alert('Cảm ơn bạn đã sử dụng CHOUX CHIN F&B! Đánh giá 5 sao cho hệ thống.')">
+            <span style="font-size: 13px;">⭐</span> Đánh giá trải nghiệm
+        </button>
+        <button class="cc-float-btn" onclick="alert('Đường dây hỗ trợ kỹ thuật CHOUX CHIN: 0901.234.567 (24/7)')">
+            <span style="font-size: 13px;">💬</span> Hỗ trợ
+        </button>
+    </div>
+
+    <!-- ====================================================================
+         11. HỘP THOẠI MODALS (BÀN ĂN, PHIẾU CHI, THÊM MÓN, THÊM NHÂN VIÊN)
+         ==================================================================== -->
+    <!-- Modal 1: Chi tiết Bàn Ăn -->
+    <div class="kv-modal-backdrop" id="modalTableDetail">
+        <div class="kv-modal">
+            <div class="kv-modal-header">
+                <span id="modalTableTitle">Chi tiết Bàn Ăn</span>
+                <button style="border:none; background:none; font-size:20px; cursor:pointer;" onclick="closeModal('modalTableDetail')">&times;</button>
+            </div>
+            <div class="kv-modal-body" id="modalTableBody"></div>
+            <div class="kv-modal-footer">
+                <button class="kv-btn kv-btn-default" onclick="closeModal('modalTableDetail')">Đóng</button>
+                <button class="kv-btn kv-btn-default" id="btnPrintReceiptBtn">🖨️ In tạm tính</button>
+                <button class="kv-btn kv-btn-danger" id="btnClearTableBtn">Giải phóng bàn</button>
+                <button class="kv-btn kv-btn-success" id="btnPayTableBtn">Thanh toán</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal 2: Thêm Nhân Viên Mới Vào PostgreSQL -->
+    <div class="kv-modal-backdrop" id="modalAddEmployee">
+        <div class="kv-modal" style="max-width: 520px;">
+            <div class="kv-modal-header">
+                <span>Thêm Nhân Viên Mới Vào CSDL</span>
+                <button style="border:none; background:none; font-size:20px; cursor:pointer;" onclick="closeModal('modalAddEmployee')">&times;</button>
+            </div>
+            <div class="kv-modal-body">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px;">
+                    <div>
+                        <label style="display:block; margin-bottom:4px; font-weight:600;">Mã nhân viên (*)</label>
+                        <input type="text" id="empCode" class="kv-form-control" style="width: 100%;" placeholder="NV008 (Tự sinh nếu trống)">
+                    </div>
+                    <div>
+                        <label style="display:block; margin-bottom:4px; font-weight:600;">Họ và tên (*)</label>
+                        <input type="text" id="empName" class="kv-form-control" style="width: 100%;" placeholder="Nguyễn Văn A">
+                    </div>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px;">
+                    <div>
+                        <label style="display:block; margin-bottom:4px; font-weight:600;">Số điện thoại</label>
+                        <input type="text" id="empPhone" class="kv-form-control" style="width: 100%;" placeholder="090...">
+                    </div>
+                    <div>
+                        <label style="display:block; margin-bottom:4px; font-weight:600;">Email</label>
+                        <input type="email" id="empEmail" class="kv-form-control" style="width: 100%;" placeholder="nhanvien@chouxchin.vn">
+                    </div>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px;">
+                    <div>
+                        <label style="display:block; margin-bottom:4px; font-weight:600;">Chức vụ / Vị trí</label>
+                        <select id="empPosition" class="kv-form-control" style="width: 100%;">
+                            <option value="Thu ngân & Phục vụ">Thu ngân &amp; Phục vụ</option>
+                            <option value="Pha chế Trà sữa">Pha chế Trà sữa</option>
+                            <option value="Bếp & Đồ ăn vặt">Bếp &amp; Đồ ăn vặt</option>
+                            <option value="Bán hàng & Tiếp thị">Bán hàng &amp; Tiếp thị</option>
+                            <option value="Kế toán & Sổ quỹ">Kế toán &amp; Sổ quỹ</option>
+                            <option value="Quản lý cửa hàng">Quản lý cửa hàng</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label style="display:block; margin-bottom:4px; font-weight:600;">Ca trực</label>
+                        <select id="empShiftId" class="kv-form-control" style="width: 100%;">
+                            <option value="1">Ca sáng (07:30 - 12:30)</option>
+                            <option value="2">Ca chiều (12:30 - 17:30)</option>
+                            <option value="3">Ca tối (17:30 - 22:30)</option>
+                        </select>
+                    </div>
+                </div>
+                <div style="margin-bottom: 12px;">
+                    <label style="display:block; margin-bottom:4px; font-weight:600;">Mức lương / giờ (VNĐ)</label>
+                    <input type="number" id="empSalaryRate" class="kv-form-control" style="width: 100%;" value="25000">
+                </div>
+            </div>
+            <div class="kv-modal-footer">
+                <button class="kv-btn kv-btn-default" onclick="closeModal('modalAddEmployee')">Hủy</button>
+                <button class="kv-btn kv-btn-primary" id="btnSaveEmployee">Lưu nhân viên</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal 3: Lập Phiếu Chi Tiền -->
+    <div class="kv-modal-backdrop" id="modalAddExpense">
+        <div class="kv-modal" style="max-width: 500px;">
+            <div class="kv-modal-header">
+                <span>Lập Phiếu Chi Tiền Quán</span>
+                <button style="border:none; background:none; font-size:20px; cursor:pointer;" onclick="closeModal('modalAddExpense')">&times;</button>
+            </div>
+            <div class="kv-modal-body">
+                <div style="margin-bottom: 12px;">
+                    <label style="display:block; margin-bottom:4px; font-weight:600;">Tên khoản chi (*)</label>
+                    <input type="text" id="expenseTitle" class="kv-form-control" style="width: 100%;" placeholder="Ví dụ: Mua 5 bao đá lạnh, Mua sữa đặc...">
+                </div>
+                <div style="margin-bottom: 12px;">
+                    <label style="display:block; margin-bottom:4px; font-weight:600;">Số tiền chi (VNĐ) (*)</label>
+                    <input type="number" id="expenseAmount" class="kv-form-control" style="width: 100%;" placeholder="150000">
+                </div>
+                <div style="margin-bottom: 12px;">
+                    <label style="display:block; margin-bottom:4px; font-weight:600;">Nhóm chi phí</label>
+                    <select id="expenseCategory" class="kv-form-control" style="width: 100%;">
+                        <option value="NGUYEN_LIEU">Nguyên vật liệu (Trà, sữa, đá, topping)</option>
+                        <option value="VAT_TU">Vật tư bao bì (Ly nhựa, màng dập, ống hút)</option>
+                        <option value="DIEN_NUOC">Vận hành (Điện, nước, internet)</option>
+                        <option value="KHAC">Chi phí khác</option>
+                    </select>
+                </div>
+                <div style="margin-bottom: 12px;">
+                    <label style="display:block; margin-bottom:4px; font-weight:600;">Ghi chú</label>
+                    <input type="text" id="expenseNote" class="kv-form-control" style="width: 100%;" placeholder="Đại lý đá sạch, Nhà cung cấp...">
+                </div>
+            </div>
+            <div class="kv-modal-footer">
+                <button class="kv-btn kv-btn-default" onclick="closeModal('modalAddExpense')">Hủy</button>
+                <button class="kv-btn kv-btn-danger" id="btnSaveExpense">Lưu phiếu chi</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal 4: Thêm Món Mới -->
+    <div class="kv-modal-backdrop" id="modalAddProduct">
+        <div class="kv-modal" style="max-width: 520px;">
+            <div class="kv-modal-header">
+                <span>Thêm Món Ăn Vặt / Đồ Uống Mới</span>
+                <button style="border:none; background:none; font-size:20px; cursor:pointer;" onclick="closeModal('modalAddProduct')">&times;</button>
+            </div>
+            <div class="kv-modal-body">
+                <div style="margin-bottom: 12px;">
+                    <label style="display:block; margin-bottom:4px; font-weight:600;">Tên món (*)</label>
+                    <input type="text" id="newProdName" class="kv-form-control" style="width: 100%;" placeholder="Tên món ăn vặt...">
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px;">
+                    <div>
+                        <label style="display:block; margin-bottom:4px; font-weight:600;">Giá bán (*)</label>
+                        <input type="number" id="newProdPrice" class="kv-form-control" style="width: 100%;" placeholder="25000">
+                    </div>
+                    <div>
+                        <label style="display:block; margin-bottom:4px; font-weight:600;">Giá vốn</label>
+                        <input type="number" id="newProdOriginalPrice" class="kv-form-control" style="width: 100%;" placeholder="15000">
+                    </div>
+                </div>
+                <div style="margin-bottom: 12px;">
+                    <label style="display:block; margin-bottom:4px; font-weight:600;">Nhóm hàng</label>
+                    <select id="newProdCategory" class="kv-form-control" style="width: 100%;">
+                        <option value="AnVatMan">🧂 Ăn vặt mặn</option>
+                        <option value="DoAnCay">🌶️ Đồ ăn cay</option>
+                        <option value="NuocUong">🥤 Nước uống</option>
+                        <option value="BanhNgot">🍰 Bánh &amp; đồ ngọt</option>
+                        <option value="SnackKeo">🍫 Snack &amp; kẹo</option>
+                        <option value="TraiCayChua">🥭 Trái cây &amp; chua</option>
+                        <option value="AnVatHanQuoc">🧀 Ăn vặt Hàn Quốc</option>
+                        <option value="MonNoNhe">🍜 Món no nhẹ</option>
+                    </select>
+                </div>
+                <div>
+                    <label style="display:block; margin-bottom:4px; font-weight:600;">Mô tả món</label>
+                    <textarea id="newProdDesc" class="kv-form-control" style="width: 100%;" rows="2" placeholder="Hương vị, thành phần..."></textarea>
+                </div>
+            </div>
+            <div class="kv-modal-footer">
+                <button class="kv-btn kv-btn-default" onclick="closeModal('modalAddProduct')">Hủy</button>
+                <button class="kv-btn kv-btn-primary" id="btnSaveNewProduct">Lưu món mới</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal 5: Xem & In Hóa Đơn Nhiệt POS -->
+    <div class="kv-modal-backdrop" id="modalReceiptPrint">
+        <div class="kv-modal" style="max-width: 400px;">
+            <div class="kv-modal-header">
+                <span>Hóa Đơn Thanh Toán POS</span>
+                <button style="border:none; background:none; font-size:20px; cursor:pointer;" onclick="closeModal('modalReceiptPrint')">&times;</button>
+            </div>
+            <div class="kv-modal-body" style="background: #F4F6F9; padding: 15px;">
+                <div class="kv-receipt" id="printableReceipt"></div>
+            </div>
+            <div class="kv-modal-footer">
+                <button class="kv-btn kv-btn-default" onclick="closeModal('modalReceiptPrint')">Đóng</button>
+                <button class="kv-btn kv-btn-primary" onclick="window.print()">🖨️ In Hóa Đơn</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal 6: Xem Định Lượng Chi Tiết & Khả Năng Bán (BOM) -->
+    <div class="kv-modal-backdrop" id="modalRecipeDetail">
+        <div class="kv-modal" style="max-width: 850px;">
+            <div class="kv-modal-header">
+                <span id="modalRecipeTitle">📋 Công Thức Định Lượng Nguyên Liệu (BOM)</span>
+                <button style="border:none; background:none; font-size:20px; cursor:pointer;" onclick="closeModal('modalRecipeDetail')">&times;</button>
+            </div>
+            <div class="kv-modal-body" style="padding: 18px;" id="modalRecipeBody">
+                <!-- Nội dung định lượng render động qua JS -->
+            </div>
+            <div class="kv-modal-footer">
+                <button class="kv-btn kv-btn-default" onclick="closeModal('modalRecipeDetail')">Đóng</button>
+                <button class="kv-btn kv-btn-primary" id="btnRecipeQuickPurchase" onclick="handleRecipePurchaseClick()">📥 Tạo phiếu nhập bổ sung</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal 7: Tạo Phiếu Nhập Hàng Mới -->
+    <div class="kv-modal-backdrop" id="modalCreatePurchase">
+        <div class="kv-modal" style="max-width: 600px;">
+            <div class="kv-modal-header">
+                <span>📥 Tạo Phiếu Nhập Hàng Mới Từ Nhà Cung Cấp</span>
+                <button style="border:none; background:none; font-size:20px; cursor:pointer;" onclick="closeModal('modalCreatePurchase')">&times;</button>
+            </div>
+            <div class="kv-modal-body" style="padding: 16px;">
+                <div style="margin-bottom: 12px;">
+                    <label style="display:block; margin-bottom:4px; font-weight:600;">Nhà cung cấp (*)</label>
+                    <select id="newPoSupplierSelect" class="kv-form-control" style="width: 100%;">
+                        <!-- Render từ danh sách NCC -->
+                    </select>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
+                    <div>
+                        <label style="display:block; margin-bottom:4px; font-weight:600;">Số hóa đơn đầu vào (nếu có)</label>
+                        <input type="text" id="newPoInvoiceNo" class="kv-form-control" style="width: 100%;" placeholder="VD: HD-VNM-9921">
+                    </div>
+                    <div>
+                        <label style="display:block; margin-bottom:4px; font-weight:600;">Người lập phiếu</label>
+                        <input type="text" id="newPoCreator" class="kv-form-control" style="width: 100%;" value="Anh Tuấn Nguyễn Huỳnh">
+                    </div>
+                </div>
+                <div style="margin-bottom: 12px;">
+                    <label style="display:block; margin-bottom:4px; font-weight:600;">Nguyên vật liệu cần nhập (*)</label>
+                    <select id="newPoIngredientSelect" class="kv-form-control" style="width: 100%;" onchange="onPoIngredientSelectChange(this.value)">
+                        <!-- Render từ danh sách nguyên liệu -->
+                    </select>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 12px;">
+                    <div>
+                        <label style="display:block; margin-bottom:4px; font-weight:600;">Số lượng nhập</label>
+                        <input type="number" id="newPoQuantity" class="kv-form-control" style="width: 100%;" value="5000" oninput="calculatePoTotal()">
+                    </div>
+                    <div>
+                        <label style="display:block; margin-bottom:4px; font-weight:600;">Đơn vị</label>
+                        <input type="text" id="newPoUnit" class="kv-form-control" style="width: 100%;" value="gram" readonly style="background:#F1F5F9;">
+                    </div>
+                    <div>
+                        <label style="display:block; margin-bottom:4px; font-weight:600;">Đơn giá nhập (₫)</label>
+                        <input type="number" id="newPoUnitPrice" class="kv-form-control" style="width: 100%;" value="150" oninput="calculatePoTotal()">
+                    </div>
+                </div>
+                <div style="margin-bottom: 12px; background: #F8FAFC; padding: 10px; border-radius: 6px; display: flex; justify-content: space-between; align-items: center;">
+                    <span style="font-weight: 600;">Thành tiền dự kiến:</span>
+                    <strong style="color: #0070F3; font-size: 16px;" id="newPoTotalDisplay">750.000 ₫</strong>
+                </div>
+                <div>
+                    <label style="display:block; margin-bottom:4px; font-weight:600;">Ghi chú phiếu nhập</label>
+                    <input type="text" id="newPoNote" class="kv-form-control" style="width: 100%;" placeholder="Nhập phục vụ bán cuối tuần...">
+                </div>
+            </div>
+            <div class="kv-modal-footer">
+                <button class="kv-btn kv-btn-default" onclick="closeModal('modalCreatePurchase')">Hủy</button>
+                <button class="kv-btn kv-btn-primary" onclick="submitCreatePurchaseOrder()">💾 Lưu &amp; Nhập Kho Ngay</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal 8: Thêm Nhà Cung Cấp Mới -->
+    <div class="kv-modal-backdrop" id="modalAddSupplier">
+        <div class="kv-modal" style="max-width: 500px;">
+            <div class="kv-modal-header">
+                <span>🏢 Thêm Nhà Cung Cấp Đối Tác Mới</span>
+                <button style="border:none; background:none; font-size:20px; cursor:pointer;" onclick="closeModal('modalAddSupplier')">&times;</button>
+            </div>
+            <div class="kv-modal-body" style="padding: 16px;">
+                <div style="margin-bottom: 12px;">
+                    <label style="display:block; margin-bottom:4px; font-weight:600;">Tên công ty / Đơn vị cung ứng (*)</label>
+                    <input type="text" id="newSupName" class="kv-form-control" style="width: 100%;" placeholder="VD: Công ty TNHH Thực Phẩm Á Châu">
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px;">
+                    <div>
+                        <label style="display:block; margin-bottom:4px; font-weight:600;">Người liên hệ</label>
+                        <input type="text" id="newSupContact" class="kv-form-control" style="width: 100%;" placeholder="Nguyễn Văn A">
+                    </div>
+                    <div>
+                        <label style="display:block; margin-bottom:4px; font-weight:600;">Số điện thoại</label>
+                        <input type="text" id="newSupPhone" class="kv-form-control" style="width: 100%;" placeholder="0901234567">
+                    </div>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px;">
+                    <div>
+                        <label style="display:block; margin-bottom:4px; font-weight:600;">Email</label>
+                        <input type="email" id="newSupEmail" class="kv-form-control" style="width: 100%;" placeholder="supplier@gmail.com">
+                    </div>
+                    <div>
+                        <label style="display:block; margin-bottom:4px; font-weight:600;">Mã số thuế</label>
+                        <input type="text" id="newSupTax" class="kv-form-control" style="width: 100%;" placeholder="0312987654">
+                    </div>
+                </div>
+                <div>
+                    <label style="display:block; margin-bottom:4px; font-weight:600;">Địa chỉ kho / trụ sở</label>
+                    <input type="text" id="newSupAddress" class="kv-form-control" style="width: 100%;" placeholder="Quận 10, TP. Hồ Chí Minh">
+                </div>
+            </div>
+            <div class="kv-modal-footer">
+                <button class="kv-btn kv-btn-default" onclick="closeModal('modalAddSupplier')">Hủy</button>
+                <button class="kv-btn kv-btn-primary" onclick="submitAddSupplier()">Lưu Nhà Cung Cấp</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal 9: Tạo Phiếu Kiểm Kho -->
+    <div class="kv-modal-backdrop" id="modalCreateAudit">
+        <div class="kv-modal" style="max-width: 550px;">
+            <div class="kv-modal-header">
+                <span>📋 Tạo Phiếu Kiểm Kê &amp; Cân Bằng Tồn Kho</span>
+                <button style="border:none; background:none; font-size:20px; cursor:pointer;" onclick="closeModal('modalCreateAudit')">&times;</button>
+            </div>
+            <div class="kv-modal-body" style="padding: 16px;">
+                <div style="margin-bottom: 12px;">
+                    <label style="display:block; margin-bottom:4px; font-weight:600;">Nguyên vật liệu cần kiểm kê (*)</label>
+                    <select id="auditIngSelect" class="kv-form-control" style="width: 100%;" onchange="onAuditIngSelectChange(this.value)">
+                        <!-- Render từ danh sách nguyên liệu -->
+                    </select>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
+                    <div>
+                        <label style="display:block; margin-bottom:4px; font-weight:600;">Tồn kho trên hệ thống</label>
+                        <input type="text" id="auditSystemStock" class="kv-form-control" style="width: 100%; background:#F1F5F9;" readonly>
+                    </div>
+                    <div>
+                        <label style="display:block; margin-bottom:4px; font-weight:600;">Số lượng kiểm đếm thực tế (*)</label>
+                        <input type="number" id="auditActualStock" class="kv-form-control" style="width: 100%;" placeholder="Nhập số thực tế...">
+                    </div>
+                </div>
+                <div>
+                    <label style="display:block; margin-bottom:4px; font-weight:600;">Lý do chênh lệch / Ghi chú kiểm kho</label>
+                    <input type="text" id="auditReason" class="kv-form-control" style="width: 100%;" placeholder="Hao hụt tự nhiên khi ủ trà, rơi vỡ...">
+                </div>
+            </div>
+            <div class="kv-modal-footer">
+                <button class="kv-btn kv-btn-default" onclick="closeModal('modalCreateAudit')">Hủy</button>
+                <button class="kv-btn kv-btn-primary" onclick="submitCreateAudit()">⚖️ Cân Bằng Kho Ngay</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal 10: Tạo Phiếu Xuất Dùng Nội Bộ / Xuất Hủy -->
+    <div class="kv-modal-backdrop" id="modalCreateDisposal">
+        <div class="kv-modal" style="max-width: 550px;">
+            <div class="kv-modal-header">
+                <span id="modalDisposalTitle">📤 Tạo Phiếu Xuất Kho</span>
+                <button style="border:none; background:none; font-size:20px; cursor:pointer;" onclick="closeModal('modalCreateDisposal')">&times;</button>
+            </div>
+            <div class="kv-modal-body" style="padding: 16px;">
+                <input type="hidden" id="disposalTypeVal" value="INTERNAL_USE">
+                <div style="margin-bottom: 12px;">
+                    <label style="display:block; margin-bottom:4px; font-weight:600;">Nguyên vật liệu xuất (*)</label>
+                    <select id="dispIngSelect" class="kv-form-control" style="width: 100%;">
+                        <!-- Render từ danh sách nguyên liệu -->
+                    </select>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
+                    <div>
+                        <label style="display:block; margin-bottom:4px; font-weight:600;">Số lượng xuất (*)</label>
+                        <input type="number" id="dispQuantity" class="kv-form-control" style="width: 100%;" value="500">
+                    </div>
+                    <div>
+                        <label style="display:block; margin-bottom:4px; font-weight:600;">Bộ phận / Nơi nhận</label>
+                        <input type="text" id="dispDepartment" class="kv-form-control" style="width: 100%;" value="Quầy Barista &amp; Pha Chế">
+                    </div>
+                </div>
+                <div>
+                    <label style="display:block; margin-bottom:4px; font-weight:600;">Lý do xuất kho</label>
+                    <input type="text" id="dispReason" class="kv-form-control" style="width: 100%;" placeholder="Pha chế thử nghiệm món, hỏng bao bì...">
+                </div>
+            </div>
+            <div class="kv-modal-footer">
+                <button class="kv-btn kv-btn-default" onclick="closeModal('modalCreateDisposal')">Hủy</button>
+                <button class="kv-btn kv-btn-primary" onclick="submitCreateDisposal()">Xác Nhận Xuất Kho</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript Chính -->
+    <script src="/chouxchin/man/js/app.js?v=20261105_1"></script>
+</body>
+</html>

@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CHOUX CHIN - Gọi Món Tại Bàn Qua Mã QR</title>
+    <link rel="icon" type="image/x-icon" href="/chouxchin/man/assets/favicon.ico">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; }
+        body { background: #F8FAFC; color: #1E293B; padding-bottom: 80px; }
+        .header { background: #0070F3; color: #FFFFFF; padding: 14px 16px; position: sticky; top: 0; z-index: 10; box-shadow: 0 2px 8px rgba(0,0,0,0.15); display: flex; justify-content: space-between; align-items: center; }
+        .header-title { font-size: 16px; font-weight: 800; display: flex; align-items: center; gap: 8px; }
+        .table-pill { background: #FFFFFF; color: #0070F3; font-size: 12px; font-weight: 800; padding: 4px 10px; border-radius: 14px; }
+        .banner { background: #EFF6FF; border-bottom: 1px solid #DBEAFE; padding: 10px 16px; font-size: 12px; color: #1E40AF; text-align: center; }
+        
+        .cat-scroll { display: flex; gap: 8px; padding: 10px 16px; overflow-x: auto; background: #FFFFFF; border-bottom: 1px solid #E2E8F0; }
+        .cat-btn { background: #F1F5F9; border: 1px solid #E2E8F0; padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: 700; white-space: nowrap; cursor: pointer; color: #475569; }
+        .cat-btn.active { background: #0070F3; color: #FFFFFF; border-color: #0070F3; }
+
+        .prod-list { padding: 12px 16px; display: flex; flex-direction: column; gap: 10px; }
+        .prod-card { background: #FFFFFF; border-radius: 8px; border: 1px solid #E2E8F0; padding: 10px; display: flex; gap: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+        .prod-img { width: 80px; height: 80px; border-radius: 6px; object-fit: cover; background: #F1F5F9; }
+        .prod-info { flex: 1; display: flex; flex-direction: column; justify-content: space-between; }
+        .prod-name { font-size: 14px; font-weight: 700; color: #0F172A; }
+        .prod-price { font-size: 14px; font-weight: 800; color: #0070F3; }
+        .prod-desc { font-size: 11px; color: #64748B; margin: 2px 0 6px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        .prod-action { display: flex; justify-content: flex-end; align-items: center; }
+        .qty-ctrl { display: flex; align-items: center; gap: 8px; }
+        .qty-btn { width: 26px; height: 26px; border-radius: 50%; border: 1px solid #CBD5E1; background: #FFF; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+        .qty-val { font-weight: 800; min-width: 16px; text-align: center; }
+
+        .footer-cart { position: fixed; bottom: 0; left: 0; right: 0; background: #FFFFFF; border-top: 1px solid #E2E8F0; padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 -4px 12px rgba(0,0,0,0.08); z-index: 20; }
+        .cart-info { font-size: 12px; color: #64748B; }
+        .cart-total { font-size: 16px; font-weight: 900; color: #0070F3; }
+        .btn-order { background: #22C55E; color: #FFF; border: none; padding: 10px 20px; border-radius: 6px; font-size: 14px; font-weight: 800; cursor: pointer; display: flex; align-items: center; gap: 6px; }
+        .btn-order:hover { background: #16A34A; }
+
+        .success-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); display: none; align-items: center; justify-content: center; z-index: 100; padding: 20px; }
+        .success-box { background: #FFF; border-radius: 12px; padding: 24px; text-align: center; max-width: 380px; width: 100%; }
+    </style>
+</head>
+<body>
+
+    <header class="header">
+        <div class="header-title">
+            <span>🥤 CHOUX CHIN F&amp;B</span>
+        </div>
+        <div class="table-pill" id="tableBadge">Bàn 01</div>
+    </header>
+
+    <div class="banner">
+        📲 Bạn đang quét mã QR gọi món trực tiếp tại quán. Món sẽ được chuyển thẳng vào Bếp!
+    </div>
+
+    <div style="padding: 10px 16px 0;">
+        <input type="text" id="orderSearchInput" placeholder="🔍 Tìm món: Cá viên, Trà sữa, Tokbokki, Khoai tây..." oninput="handleSearch(this.value)" style="width: 100%; padding: 10px 14px; border: 1px solid #CBD5E1; border-radius: 8px; font-size: 13px; outline: none; background: #FFF;">
+    </div>
+
+    <div class="cat-scroll" id="catScroll">
+        <button class="cat-btn active" onclick="filterCategory('ALL')">Tất cả món (95)</button>
+        <button class="cat-btn" onclick="filterCategory('AnVatMan')">Ăn vặt mặn</button>
+        <button class="cat-btn" onclick="filterCategory('NuocUong')">Nước uống &amp; Trà sữa</button>
+        <button class="cat-btn" onclick="filterCategory('DoAnCay')">Đồ ăn cay</button>
+        <button class="cat-btn" onclick="filterCategory('AnVatHanQuoc')">Ăn vặt Hàn Quốc</button>
+        <button class="cat-btn" onclick="filterCategory('MonNoNhe')">Món no nhẹ</button>
+        <button class="cat-btn" onclick="filterCategory('TraiCayChua')">Trái cây &amp; Đồ chua</button>
+        <button class="cat-btn" onclick="filterCategory('BanhNgot')">Bánh &amp; Đồ ngọt</button>
+        <button class="cat-btn" onclick="filterCategory('SnackKeo')">Snack &amp; Kẹo</button>
+    </div>
+
+    <div class="prod-list" id="prodList">
+        <p style="text-align: center; padding: 30px; color: #64748B;">Đang tải danh sách món ăn Choux Chin...</p>
+    </div>
+
+    <footer class="footer-cart">
+        <div>
+            <div class="cart-info" id="cartCount">0 món đã chọn</div>
+            <div class="cart-total" id="cartTotal">0 ₫</div>
+        </div>
+        <button class="btn-order" onclick="submitCustomerOrder()">
+            <span>Gửi Bếp Nấu Ngay</span> ➔
+        </button>
+    </footer>
+
+    <!-- Overlay Báo Gọi Món Thành Công -->
+    <div class="success-overlay" id="successOverlay">
+        <div class="success-box">
+            <div style="font-size: 50px; margin-bottom: 10px;">✅</div>
+            <h3 style="font-size: 18px; margin-bottom: 6px; color: #0F172A;">Đã Gửi Đơn Vào Bếp!</h3>
+            <p style="font-size: 13px; color: #64748B; margin-bottom: 16px;">
+                Bếp Choux Chin đã nhận được yêu cầu và đang chuẩn bị món cho <strong id="succTable">Bàn 01</strong>. Bạn có thể theo dõi trên màn hình!
+            </p>
+            <button onclick="location.reload()" style="background: #0070F3; color: #FFF; border: none; padding: 10px 20px; border-radius: 6px; font-weight: 700; cursor: pointer; width: 100%;">
+                Tiếp Tục Đặt Thêm Món
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const currentTable = urlParams.get('table') || 'Bàn 01';
+        document.getElementById('tableBadge').innerText = currentTable;
+
+        let allProducts = [];
+        let cart = {}; // { productId: qty }
+
+        async function loadMenu() {
+            try {
+                const res = await fetch('/api/v1/owner/products');
+                const data = await res.json();
+                allProducts = data.data || [];
+                renderProducts(allProducts);
+            } catch (e) {
+                document.getElementById('prodList').innerHTML = `<p style="color: red; text-align: center;">Lỗi tải menu: ${e.message}</p>`;
+            }
+        }
+
+        function renderProducts(list) {
+            const container = document.getElementById('prodList');
+            if (list.length === 0) {
+                container.innerHTML = `<p style="text-align: center; color: #64748B;">Không có món nào trong nhóm này</p>`;
+                return;
+            }
+
+            container.innerHTML = list.map(p => {
+                const qty = cart[p.id] || 0;
+                return `
+                    <div class="prod-card">
+                        <img src="${p.imageUrl || '/chouxchin/man/assets/snack_default.png'}" class="prod-img" onerror="this.src='/chouxchin/man/assets/snack_default.png'">
+                        <div class="prod-info">
+                            <div>
+                                <div class="prod-name">${escapeHtml(p.name)}</div>
+                                <div class="prod-desc">${escapeHtml(p.description || '')}</div>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 6px;">
+                                <div class="prod-price">${Number(p.price).toLocaleString('vi-VN')} ₫</div>
+                                <div class="qty-ctrl">
+                                    ${qty > 0 ? `
+                                        <button class="qty-btn" onclick="changeQty(${p.id}, -1)">-</button>
+                                        <span class="qty-val">${qty}</span>
+                                    ` : ''}
+                                    <button class="qty-btn" style="background:#0070F3; color:#FFF; border-color:#0070F3;" onclick="changeQty(${p.id}, 1)">+</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function changeQty(prodId, delta) {
+            const current = cart[prodId] || 0;
+            const updated = current + delta;
+            if (updated <= 0) {
+                delete cart[prodId];
+            } else {
+                cart[prodId] = updated;
+            }
+            updateCartSummary();
+            renderProducts(allProducts);
+        }
+
+        function updateCartSummary() {
+            let totalQty = 0;
+            let totalPrice = 0;
+
+            Object.entries(cart).forEach(([id, qty]) => {
+                const p = allProducts.find(item => item.id == id);
+                if (p) {
+                    totalQty += qty;
+                    totalPrice += p.price * qty;
+                }
+            });
+
+            document.getElementById('cartCount').innerText = `${totalQty} món đã chọn`;
+            document.getElementById('cartTotal').innerText = `${totalPrice.toLocaleString('vi-VN')} ₫`;
+        }
+
+        function handleSearch(keyword) {
+            const q = (keyword || '').toLowerCase().trim();
+            if (!q) {
+                renderProducts(allProducts);
+                return;
+            }
+            const filtered = allProducts.filter(p => (p.name || '').toLowerCase().includes(q) || (p.description || '').toLowerCase().includes(q));
+            renderProducts(filtered);
+        }
+
+        function filterCategory(catCode) {
+            document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+            event.target.classList.add('active');
+
+            if (catCode === 'ALL') {
+                renderProducts(allProducts);
+            } else {
+                renderProducts(allProducts.filter(p => p.categoryCode === catCode));
+            }
+        }
+
+        async function submitCustomerOrder() {
+            const items = Object.entries(cart).map(([id, qty]) => {
+                const p = allProducts.find(item => item.id == id);
+                return {
+                    productId: Number(id),
+                    productName: p ? p.name : 'Món',
+                    quantity: qty,
+                    unitPrice: p ? p.price : 0,
+                    note: 'Khách gọi qua QR Bàn'
+                };
+            });
+
+            if (items.length === 0) {
+                alert('Vui lòng chọn ít nhất 1 món để gửi bếp!');
+                return;
+            }
+
+            try {
+                const res = await fetch('/api/v1/kds/orders/create', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        tableNumber: currentTable,
+                        items: items,
+                        customerNotes: `Khách quét QR tại ${currentTable}`
+                    })
+                });
+
+                if (res.ok) {
+                    document.getElementById('succTable').innerText = currentTable;
+                    document.getElementById('successOverlay').style.display = 'flex';
+                } else {
+                    alert('Lỗi gửi đơn vào bếp!');
+                }
+            } catch (e) {
+                alert('Lỗi kết nối: ' + e.message);
+            }
+        }
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        }
+
+        async function checkinTable() {
+            try {
+                await fetch('/api/v1/customer/table-checkin', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ tableNumber: currentTable })
+                });
+            } catch (e) {
+                console.warn('Checkin table error:', e);
+            }
+        }
+
+        checkinTable();
+        loadMenu();
+    </script>
+</body>
+</html>

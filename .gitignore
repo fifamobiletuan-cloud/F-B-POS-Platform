@@ -1,5 +1,7 @@
 # Build artifacts
 backend_springboot/target/
+node_modules/
+**/node_modules/
 frontend_flutter/build/*
 !frontend_flutter/build/web/
 frontend_flutter/.dart_tool/
@@ -11,6 +13,10 @@ scratch/
 *.log
 *.tmp
 .DS_Store
+
+# Private Defense & QA Documents (DO NOT PUSH TO GITHUB)
+TAI_LIEU_VAN_DAP_VA_GIOI_THIEU_DO_AN_CHO_THAY.docx
+HUONG_DAN_VAN_HANH_VA_KICH_BAN_DEMO_DO_AN_TOT_NGHIEP.docx
 
 # IDE
 .idea/

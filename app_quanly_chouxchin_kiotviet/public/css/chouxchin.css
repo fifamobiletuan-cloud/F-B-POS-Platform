@@ -1,0 +1,1500 @@
+/* ====================================================================
+   CHOUX CHIN F&B - GIAO DIỆN QUẢN LÝ DÀNH RIÊNG CHO CHỦ QUÁN ĂN VẶT
+   Tác giả: Nguyễn Huỳnh Anh Tuấn - Đồ án tốt nghiệp CNTT
+   Kết nối trực tiếp CSDL PostgreSQL milktea_pos_db
+   Sửa triệt để lỗi tràn canvas và đè layer giao diện
+   ==================================================================== */
+
+:root {
+    --cc-blue: #0070F3;
+    --cc-blue-dark: #0060A8;
+    --cc-blue-light: #EBF5FF;
+    --cc-green: #10B981;
+    --cc-green-light: #ECFDF5;
+    --cc-orange: #FF8A00;
+    --cc-yellow: #F59E0B;
+    --cc-yellow-light: #FFFBEB;
+    --cc-red: #EF4444;
+    --cc-bg: #F4F6F9;
+    --cc-card-bg: #FFFFFF;
+    --cc-border: #E5E7EB;
+    --cc-border-subtle: #F1F5F9;
+    --cc-text: #1E293B;
+    --cc-text-dark: #0F172A;
+    --cc-text-muted: #64748B;
+    --cc-text-light: #94A3B8;
+    --cc-radius: 8px;
+    --cc-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    font-size: 13px;
+    line-height: 1.5;
+    color: var(--cc-text);
+    background-color: var(--cc-bg);
+    overflow-x: hidden;
+    padding-bottom: 46px;
+    -webkit-font-smoothing: antialiased;
+}
+
+/* KHẮC PHỤC TRIỆT ĐỂ LỖI CANVAS OVERFLOW TRÀN RA NGOÀI KHUNG GRID */
+canvas {
+    max-width: 100% !important;
+    display: block;
+}
+
+/* ====================================================================
+   1. TOP GLOBAL NAVBAR (HEADER TRẮNG + MENU PILL XANH DƯƠNG CHUẨN 100%)
+   ==================================================================== */
+.kv-header {
+    height: 52px;
+    background-color: #FFFFFF;
+    border-bottom: 1px solid var(--cc-border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 20px;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+}
+
+.kv-header-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.kv-brand-logo {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.kv-brand-icon-svg {
+    width: 28px;
+    height: 28px;
+    flex-shrink: 0;
+}
+
+.kv-brand-title {
+    font-size: 19px;
+    font-weight: 900;
+    letter-spacing: -0.5px;
+    color: #0060A8;
+    display: flex;
+    align-items: center;
+}
+
+.kv-brand-fnb-badge {
+    background-color: #FF8A00;
+    color: #FFFFFF;
+    font-size: 10px;
+    font-weight: 800;
+    padding: 2px 6px;
+    border-radius: 4px;
+    margin-left: 6px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+}
+
+.kv-nav-pill-bar {
+    background-color: #0070F3;
+    border-radius: 24px;
+    height: 36px;
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 4px;
+    gap: 2px;
+    list-style: none;
+}
+
+.kv-nav-pill-item {
+    color: #FFFFFF;
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 500;
+    padding: 5px 12px;
+    border-radius: 20px;
+    transition: all 0.15s ease-in-out;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    line-height: 1.2;
+}
+
+.kv-nav-pill-item:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+    color: #FFFFFF;
+}
+
+.kv-nav-pill-item.active {
+    background-color: #FFFFFF;
+    color: #0070F3;
+    font-weight: 700;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+}
+
+/* ====================================================================
+   MEGA DROPDOWN KHO HÀNG 2 CỘT CHUẨN 100% THEO ẢNH NGƯỜI DÙNG CUNG CẤP
+   ==================================================================== */
+.kv-nav-item-dropdown {
+    position: relative;
+    list-style: none;
+    height: 100%;
+    display: inline-flex;
+    align-items: center;
+}
+
+.kv-mega-dropdown {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    background: #FFFFFF;
+    border-radius: 8px;
+    box-shadow: 0 14px 30px rgba(15, 23, 42, 0.16), 0 4px 10px rgba(15, 23, 42, 0.08);
+    border: 1px solid #E2E8F0;
+    display: none;
+    flex-direction: row;
+    padding: 10px 6px;
+    min-width: 360px;
+    z-index: 1050;
+}
+
+.kv-nav-item-dropdown:hover .kv-mega-dropdown,
+.kv-nav-item-dropdown.show .kv-mega-dropdown {
+    display: flex;
+}
+
+.kv-mega-dropdown::before {
+    content: '';
+    position: absolute;
+    top: -6px;
+    left: 32px;
+    width: 12px;
+    height: 12px;
+    background: #FFFFFF;
+    transform: rotate(45deg);
+    border-left: 1px solid #E2E8F0;
+    border-top: 1px solid #E2E8F0;
+}
+
+.kv-mega-col {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 0 4px;
+    min-width: 165px;
+}
+
+.kv-mega-col-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: #475569;
+    padding: 6px 12px 8px;
+}
+
+.kv-mega-link {
+    display: block;
+    padding: 8px 12px;
+    font-size: 13.5px;
+    color: #1E293B;
+    text-decoration: none;
+    border-radius: 4px;
+    transition: all 0.12s ease;
+    white-space: nowrap;
+    line-height: 1.3;
+}
+
+.kv-mega-link:hover {
+    background-color: #F1F5F9;
+    color: #0070F3;
+}
+
+.kv-mega-link.active {
+    background-color: #EBF5FF;
+    color: #0070F3;
+    font-weight: 600;
+}
+
+.kv-mega-divider {
+    width: 1px;
+    background-color: #E2E8F0;
+    margin: 4px 4px;
+}
+
+/* ====================================================================
+   STYLE RIÊNG CHO PHÂN HỆ QUẢN LÝ KHO HÀNG (INVENTORY)
+   ==================================================================== */
+.inv-featured-dish-card {
+    background: linear-gradient(135deg, #FFFFFF 0%, #F8FAFC 100%);
+    border: 1.5px solid #0070F3;
+    border-radius: 10px;
+    padding: 18px 22px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 12px rgba(0, 112, 243, 0.08);
+    position: relative;
+}
+
+.dish-badge-flag {
+    display: inline-block;
+    background: #0070F3;
+    color: #FFFFFF;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 12px;
+    letter-spacing: 0.3px;
+}
+
+.inv-status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.inv-status-pill.stocked {
+    background-color: #ECFDF5;
+    color: #059669;
+    border: 1px solid #A7F3D0;
+}
+
+.inv-status-pill.shortage {
+    background-color: #FEF2F2;
+    color: #DC2626;
+    border: 1px solid #FECACA;
+}
+
+.inv-status-pill.warning {
+    background-color: #FFFBEB;
+    color: #D97706;
+    border: 1px solid #FDE68A;
+}
+
+.inv-subtab-pane {
+    display: none;
+    animation: fadeIn 0.18s ease;
+}
+
+.inv-subtab-pane.active {
+    display: block;
+}
+
+.inv-progress-bar-bg {
+    width: 100%;
+    height: 6px;
+    background-color: #E2E8F0;
+    border-radius: 3px;
+    overflow: hidden;
+    margin-top: 4px;
+}
+
+.inv-progress-bar-fill {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 0.3s ease;
+}
+
+.kv-header-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.kv-pill-store-btn {
+    background: #FFFFFF;
+    border: 1px solid var(--cc-border);
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #1E293B;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.15s;
+    user-select: none;
+}
+
+.kv-pill-store-btn:hover {
+    border-color: #0070F3;
+    background: #F8FAFC;
+    color: #0070F3;
+}
+
+.kv-branch-menu {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    background: #FFFFFF;
+    border: 1px solid #CBD5E1;
+    border-radius: 10px;
+    box-shadow: 0 14px 30px rgba(15, 23, 42, 0.18), 0 4px 10px rgba(15, 23, 42, 0.08);
+    width: 320px;
+    z-index: 2000;
+    padding: 6px 0;
+    animation: fadeInDown 0.12s ease;
+}
+
+.kv-branch-menu-header {
+    font-size: 11px;
+    text-transform: uppercase;
+    font-weight: 700;
+    color: #64748B;
+    padding: 8px 16px;
+    border-bottom: 1px solid #F1F5F9;
+    letter-spacing: 0.5px;
+}
+
+.kv-branch-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 16px;
+    text-decoration: none;
+    color: #1E293B;
+    transition: background 0.15s;
+    cursor: pointer;
+}
+
+.kv-branch-item:hover {
+    background: #F1F5F9;
+}
+
+.kv-branch-item.active {
+    background: #EFF6FF;
+    border-left: 3px solid #0070F3;
+}
+
+.kv-branch-item .branch-icon {
+    font-size: 20px;
+    flex-shrink: 0;
+}
+
+.kv-branch-item .branch-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.kv-branch-item .branch-info strong {
+    font-size: 13.5px;
+    color: #0F172A;
+}
+
+.kv-branch-item .branch-info small {
+    font-size: 11.5px;
+    color: #64748B;
+    margin-top: 2px;
+}
+
+.kv-branch-divider {
+    height: 1px;
+    background: #E2E8F0;
+    margin: 6px 0;
+}
+
+.kv-pill-cashier-btn {
+    background: #FFFFFF;
+    border: 1px solid #0070F3;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 700;
+    color: #0070F3;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.15s;
+}
+
+.kv-pill-cashier-btn:hover {
+    background-color: #EBF5FF;
+}
+
+.kv-icon-circle-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 1px solid var(--cc-border);
+    background: #FFFFFF;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--cc-text-muted);
+    cursor: pointer;
+    position: relative;
+    transition: all 0.15s;
+    font-size: 14px;
+}
+
+.kv-notification-badge {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    width: 8px;
+    height: 8px;
+    background-color: var(--cc-red);
+    border-radius: 50%;
+    border: 1.5px solid #FFFFFF;
+    display: none;
+}
+
+/* ====================================================================
+   2. TRANG DASHBOARD CHÍNH (BỨC TRANH KINH DOANH)
+   ==================================================================== */
+.cc-container {
+    max-width: 1680px;
+    width: 100%;
+    margin: 0 auto;
+    padding: 16px 20px 85px;
+    box-sizing: border-box;
+}
+
+.cc-dashboard-top-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+}
+
+.cc-dashboard-title {
+    font-size: 20px;
+    font-weight: 800;
+    color: var(--cc-text-dark);
+    letter-spacing: -0.3px;
+}
+
+.cc-branch-dropdown {
+    background: #FFFFFF;
+    border: 1px solid var(--cc-border);
+    padding: 6px 14px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 500;
+    color: #374151;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    outline: none;
+}
+
+/* Bố Cục 2 Cột: Cột Trái Nội Dung Chính & Cột Phải Sidebar */
+.cc-main-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 320px;
+    gap: 16px;
+    align-items: start;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.cc-col-main {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    min-width: 0;
+    max-width: 100%;
+    overflow: hidden;
+}
+
+.cc-col-sidebar {
+    width: 320px;
+    min-width: 320px;
+    max-width: 320px;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    position: relative;
+    z-index: 2;
+    box-sizing: border-box;
+}
+
+/* ====================================================================
+   3. BA THẺ KPI CHÍNH (ROW 1)
+   ==================================================================== */
+.cc-kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 14px;
+    min-width: 0;
+}
+
+.cc-kpi-card {
+    background: #FFFFFF;
+    border: 1px solid var(--cc-border);
+    border-radius: var(--cc-radius);
+    padding: 14px 16px;
+    position: relative;
+    box-shadow: var(--cc-shadow);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: 145px;
+    min-width: 0;
+    overflow: hidden;
+}
+
+.cc-kpi-card.card-blue {
+    background: linear-gradient(135deg, #EFF6FF 0%, #FFFFFF 65%);
+    border-left: 4px solid #0070F3;
+}
+
+.cc-kpi-card.card-green {
+    background: linear-gradient(135deg, #F0FDF4 0%, #FFFFFF 65%);
+    border-left: 4px solid #10B981;
+}
+
+.cc-kpi-card.card-yellow {
+    background: linear-gradient(135deg, #FFFBEB 0%, #FFFFFF 65%);
+    border-left: 4px solid #F59E0B;
+}
+
+.cc-kpi-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 13px;
+    font-weight: 700;
+    color: #1E293B;
+}
+
+.cc-kpi-header .vat-note {
+    font-size: 11px;
+    color: var(--cc-text-muted);
+    font-weight: 400;
+}
+
+.cc-kpi-value {
+    font-size: 26px;
+    font-weight: 800;
+    color: var(--cc-text-dark);
+    margin: 6px 0 2px;
+    letter-spacing: -0.5px;
+}
+
+.cc-kpi-trend {
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-bottom: 10px;
+}
+
+.trend-down { color: #EF4444; font-weight: 600; }
+.trend-up { color: #10B981; font-weight: 600; }
+
+.cc-kpi-footer-items {
+    border-top: 1px dashed var(--cc-border);
+    padding-top: 8px;
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    color: var(--cc-text-muted);
+}
+
+.cc-kpi-footer-items strong {
+    color: #1E293B;
+}
+
+/* ====================================================================
+   4. CÁC HỘP BOX PHÂN TÍCH (CHARTS, DONUT, NHÂN SỰ, HỦY MÓN)
+   ==================================================================== */
+.cc-card-box {
+    background: #FFFFFF;
+    border: 1px solid var(--cc-border);
+    border-radius: var(--cc-radius);
+    padding: 16px;
+    box-shadow: var(--cc-shadow);
+    min-width: 0;
+    max-width: 100%;
+    overflow: hidden;
+    position: relative;
+}
+
+.cc-card-box-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+}
+
+.cc-card-box-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--cc-text-dark);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.cc-time-select {
+    background: #FFFFFF;
+    border: 1px solid var(--cc-border);
+    border-radius: 6px;
+    padding: 4px 10px;
+    font-size: 12px;
+    color: #374151;
+    cursor: pointer;
+    outline: none;
+}
+
+.cc-chart-tabs {
+    display: flex;
+    gap: 16px;
+    font-size: 12px;
+    border-bottom: 1px solid var(--cc-border-subtle);
+    margin-bottom: 12px;
+}
+
+.cc-chart-tab {
+    padding-bottom: 6px;
+    color: var(--cc-text-muted);
+    cursor: pointer;
+    font-weight: 500;
+    border-bottom: 2px solid transparent;
+    background: none;
+    border-top: none;
+    border-left: none;
+    border-right: none;
+    outline: none;
+    font-size: 12px;
+}
+
+.cc-chart-tab.active {
+    color: #0070F3;
+    font-weight: 700;
+    border-bottom-color: #0070F3;
+}
+
+.cc-chart-big-metric {
+    font-size: 19px;
+    font-weight: 800;
+    color: var(--cc-text-dark);
+    margin-bottom: 8px;
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+}
+
+.cc-chart-big-metric .sub {
+    font-size: 12px;
+    font-weight: 400;
+    color: var(--cc-text-muted);
+}
+
+/* Khung Chứa Canvas Cố Định Tuyệt Đối Không Cho Tràn */
+.cc-chart-container {
+    position: relative;
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    height: 190px;
+    overflow: hidden;
+}
+
+/* Grid 2 Chart Song Song */
+.cc-double-chart-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 14px;
+    min-width: 0;
+    max-width: 100%;
+}
+
+/* Hiệu Quả Thực Đơn */
+.cc-avg-badges-row {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 14px;
+    margin-bottom: 16px;
+    background: #F8FAFC;
+    padding: 10px 16px;
+    border-radius: 6px;
+    border: 1px solid var(--cc-border-subtle);
+    min-width: 0;
+}
+
+.cc-avg-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+}
+
+.cc-avg-item .icon { font-size: 22px; flex-shrink: 0; }
+.cc-avg-item .label { font-size: 11px; color: var(--cc-text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cc-avg-item .value { font-size: 15px; font-weight: 800; color: #0F172A; }
+
+.cc-menu-sub-grid {
+    display: grid;
+    grid-template-columns: 260px minmax(0, 1fr);
+    gap: 20px;
+    align-items: center;
+    min-width: 0;
+}
+
+.cc-donut-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 10px;
+    font-size: 11px;
+    color: var(--cc-text-muted);
+    font-weight: 600;
+}
+
+.cc-donut-legend-item {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.cc-color-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 2px;
+    display: inline-block;
+}
+
+.cc-clean-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+}
+
+.cc-clean-table th {
+    text-align: left;
+    color: var(--cc-text-muted);
+    font-weight: 600;
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--cc-border);
+    font-size: 11px;
+}
+
+.cc-clean-table td {
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--cc-border-subtle);
+}
+
+.cc-clean-table tbody tr:hover {
+    background-color: #F8FAFC;
+}
+
+.cc-pagination {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 6px;
+    margin-top: 10px;
+    font-size: 11px;
+    color: var(--cc-text-muted);
+}
+
+.cc-pagination-btn {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: #64748B;
+    font-size: 14px;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 4px;
+    transition: all 0.15s ease;
+    user-select: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+}
+
+.cc-pagination-btn:hover:not(:disabled) {
+    background-color: #E2E8F0;
+    color: #0070F3;
+}
+
+.cc-pagination-btn:active:not(:disabled) {
+    background-color: #CBD5E1;
+}
+
+.cc-pagination-btn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+/* Row 4: Hủy Món & Theo Dõi Nhân Viên */
+.cc-split-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 14px;
+    min-width: 0;
+    max-width: 100%;
+}
+
+.cc-cancel-summary {
+    display: flex;
+    gap: 30px;
+    margin-bottom: 14px;
+}
+
+.cc-cancel-summary-col {
+    display: flex;
+    flex-direction: column;
+}
+
+.cc-cancel-summary-col .lbl { font-size: 12px; color: var(--cc-text-muted); }
+.cc-cancel-summary-col .val { font-size: 20px; font-weight: 800; color: #0F172A; }
+
+.cc-accordion-item {
+    border: 1px solid var(--cc-border-subtle);
+    border-radius: 6px;
+    padding: 8px 12px;
+    margin-bottom: 6px;
+    font-size: 12px;
+}
+
+.cc-accordion-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+}
+
+.cc-accordion-content {
+    padding: 16px 0 10px;
+    text-align: center;
+    color: var(--cc-text-muted);
+    font-size: 12px;
+}
+
+.cc-badge-sample {
+    background-color: #EBF5FF;
+    color: #0070F3;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 12px;
+    margin-left: 6px;
+}
+
+.cc-staff-metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.cc-staff-metric-box {
+    background: #F8FAFC;
+    border: 1px solid var(--cc-border-subtle);
+    border-radius: 6px;
+    padding: 8px;
+    text-align: center;
+}
+
+.cc-staff-metric-box .lbl { font-size: 11px; color: var(--cc-text-muted); }
+.cc-staff-metric-box .val { font-size: 16px; font-weight: 800; color: #0F172A; margin-top: 2px; }
+
+/* ====================================================================
+   5. CỘT PHẢI SIDEBAR (DỊCH VỤ NHANH, BANNER, HOẠT ĐỘNG GẦN ĐÂY)
+   ==================================================================== */
+.cc-quick-services-box {
+    background: #FFFFFF;
+    border: 1px solid var(--cc-border);
+    border-radius: var(--cc-radius);
+    padding: 8px 14px;
+    box-shadow: var(--cc-shadow);
+}
+
+.cc-quick-service-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 9px 0;
+    border-bottom: 1px solid var(--cc-border-subtle);
+    text-decoration: none;
+    color: inherit;
+    cursor: pointer;
+}
+
+.cc-quick-service-item:last-child {
+    border-bottom: none;
+}
+
+.cc-quick-service-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.cc-quick-service-icon {
+    font-size: 20px;
+}
+
+.cc-quick-service-title {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--cc-text-dark);
+}
+
+.cc-quick-service-sub {
+    font-size: 11px;
+    color: var(--cc-text-muted);
+}
+
+.cc-greensm-banner {
+    border-radius: var(--cc-radius);
+    overflow: hidden;
+    box-shadow: var(--cc-shadow);
+    background: linear-gradient(135deg, #00A651 0%, #007A3B 100%);
+    color: #FFFFFF;
+    padding: 14px 16px;
+    position: relative;
+    cursor: pointer;
+}
+
+.cc-greensm-header {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    font-weight: 800;
+    margin-bottom: 6px;
+}
+
+.cc-greensm-title {
+    font-size: 14px;
+    font-weight: 900;
+    line-height: 1.3;
+}
+
+.cc-greensm-sub {
+    font-size: 11px;
+    opacity: 0.9;
+    margin-top: 4px;
+}
+
+.cc-promo-card {
+    background: #FFFFFF;
+    border: 1px solid var(--cc-border);
+    border-radius: var(--cc-radius);
+    padding: 12px 14px;
+    box-shadow: var(--cc-shadow);
+}
+
+.cc-promo-tag {
+    background: #EF4444;
+    color: #FFFFFF;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 1px 6px;
+    border-radius: 10px;
+    display: inline-block;
+    margin-right: 6px;
+}
+
+.cc-promo-link {
+    display: inline-flex;
+    align-items: center;
+    color: #0070F3;
+    font-size: 12px;
+    font-weight: 600;
+    text-decoration: none;
+    margin-top: 6px;
+}
+
+.cc-activity-box {
+    background: #FFFFFF;
+    border: 1px solid var(--cc-border);
+    border-radius: var(--cc-radius);
+    padding: 16px;
+    box-shadow: var(--cc-shadow);
+    display: flex;
+    flex-direction: column;
+    min-height: 520px;
+    box-sizing: border-box;
+    transition: height 0.2s ease;
+}
+
+.cc-activity-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--cc-text-dark);
+    margin-bottom: 12px;
+    flex-shrink: 0;
+}
+
+.cc-activity-list {
+    list-style: none;
+    flex: 1;
+    overflow-y: auto;
+    padding-right: 6px;
+    margin: 0;
+    max-height: none;
+    min-height: 0;
+}
+
+.cc-activity-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+.cc-activity-list::-webkit-scrollbar-track {
+    background: #F8FAFC;
+    border-radius: 4px;
+}
+
+.cc-activity-list::-webkit-scrollbar-thumb {
+    background: #CBD5E1;
+    border-radius: 4px;
+}
+
+.cc-activity-list::-webkit-scrollbar-thumb:hover {
+    background: #94A3B8;
+}
+
+.cc-activity-item {
+    display: flex;
+    gap: 10px;
+    padding: 9px 0;
+    border-bottom: 1px dashed var(--cc-border-subtle);
+    font-size: 12px;
+}
+
+.cc-activity-item:last-child {
+    border-bottom: none;
+}
+
+.cc-activity-avatar {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background-color: #E2E8F0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #475569;
+    font-size: 13px;
+    flex-shrink: 0;
+}
+
+.cc-activity-content {
+    flex: 1;
+    line-height: 1.4;
+    min-width: 0;
+    overflow: hidden;
+}
+
+.cc-activity-content .user {
+    font-weight: 700;
+    color: #0F172A;
+}
+
+.cc-activity-content .action-tag {
+    color: #0070F3;
+    font-weight: 600;
+}
+
+.cc-activity-content .amount {
+    font-weight: 700;
+    color: #0F172A;
+}
+
+.cc-activity-content .branch {
+    color: var(--cc-text-muted);
+}
+
+.cc-activity-content .time {
+    font-size: 11px;
+    color: var(--cc-text-light);
+    margin-top: 2px;
+}
+
+/* ====================================================================
+   6. THANH CẢNH BÁO DƯỚI ĐÁY & NÚT NỔI FLOATING ACTIONS
+   ==================================================================== */
+.kv-bottom-banner {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: #FEF9E7;
+    border-top: 1px solid #FDE68A;
+    color: #92400E;
+    font-size: 12px;
+    padding: 7px 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    z-index: 999;
+}
+
+.kv-bottom-banner a {
+    color: #92400E;
+    font-weight: 700;
+    text-decoration: underline;
+}
+
+.cc-floating-actions {
+    position: fixed;
+    bottom: 34px;
+    right: 20px;
+    display: flex;
+    gap: 8px;
+    z-index: 1000;
+}
+
+.cc-float-btn {
+    background-color: #0070F3;
+    color: #FFFFFF;
+    padding: 7px 14px;
+    border-radius: 24px;
+    font-size: 12px;
+    font-weight: 700;
+    border: none;
+    box-shadow: 0 4px 12px rgba(0, 112, 243, 0.35);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.cc-float-btn:hover {
+    background-color: #0056B3;
+    transform: translateY(-2px);
+}
+
+/* ====================================================================
+   7. CÁC VIEW PHỤ (THỰC ĐƠN, BÀN ĂN, ĐƠN HÀNG, SỔ QUỸ, NHÂN VIÊN, POS)
+   ==================================================================== */
+.kv-content-container {
+    display: none;
+    padding: 16px 20px 40px;
+    max-width: 1680px;
+    margin: 0 auto;
+}
+
+.kv-content-container.active-view {
+    display: block;
+}
+
+.kv-box {
+    background: #FFFFFF;
+    border: 1px solid var(--cc-border);
+    border-radius: var(--cc-radius);
+    padding: 16px;
+    box-shadow: var(--cc-shadow);
+    margin-bottom: 16px;
+}
+
+.kv-box-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+}
+
+.kv-box-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--cc-text-dark);
+}
+
+.kv-form-control {
+    border: 1px solid var(--cc-border);
+    border-radius: 6px;
+    padding: 6px 12px;
+    font-size: 12px;
+    outline: none;
+}
+
+.kv-form-control:focus {
+    border-color: #0070F3;
+}
+
+.kv-btn {
+    padding: 6px 14px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: all 0.15s;
+}
+
+.kv-btn-default { background: #FFF; border-color: var(--cc-border); color: #333; }
+.kv-btn-primary { background: #0070F3; color: #FFF; }
+.kv-btn-success { background: #10B981; color: #FFF; }
+.kv-btn-danger { background: #EF4444; color: #FFF; }
+
+.kv-table-wrapper {
+    overflow-x: auto;
+}
+
+.kv-data-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+}
+
+.kv-data-table th {
+    background-color: #F8FAFC;
+    padding: 10px 12px;
+    font-weight: 600;
+    color: var(--cc-text-muted);
+    border-bottom: 1px solid var(--cc-border);
+    text-align: left;
+}
+
+.kv-data-table td {
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--cc-border-subtle);
+}
+
+.kv-data-table tbody tr:hover {
+    background-color: #F8FAFC;
+}
+
+.kv-badge {
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+    display: inline-block;
+}
+
+.kv-badge-success { background: #ECFDF5; color: #10B981; }
+.kv-badge-warning { background: #FFFBEB; color: #F59E0B; }
+.kv-badge-danger { background: #FEF2F2; color: #EF4444; }
+.kv-badge-info { background: #EBF5FF; color: #0070F3; }
+
+/* Modal */
+.kv-modal-backdrop {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0, 0, 0, 0.45);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+    backdrop-filter: blur(2px);
+}
+
+.kv-modal-backdrop.show { display: flex; }
+
+.kv-modal {
+    background: #FFF;
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    width: 90%;
+    max-width: 600px;
+    max-height: 90vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.kv-modal-header {
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--cc-border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #F8FAFC;
+    font-weight: 700;
+    color: #0070F3;
+}
+
+.kv-modal-body {
+    padding: 20px;
+    overflow-y: auto;
+}
+
+.kv-modal-footer {
+    padding: 12px 20px;
+    border-top: 1px solid var(--cc-border);
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    background: #F8FAFC;
+}
+
+/* ====================================================================
+   8. MEDIA QUERIES (RESPONSIVE CHUẨN XÁC, KHÔNG BAO GIỜ CHỒNG CHÉO)
+   ==================================================================== */
+@media (max-width: 1280px) {
+    .cc-main-grid {
+        grid-template-columns: 1fr;
+    }
+    .cc-col-sidebar {
+        width: 100%;
+        min-width: 100%;
+        max-width: 100%;
+    }
+}
+
+@media (max-width: 992px) {
+    .cc-kpi-grid,
+    .cc-double-chart-grid,
+    .cc-split-grid,
+    .cc-menu-sub-grid,
+    .cc-avg-badges-row {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ====================================================================
+   9. CUSTOM ENHANCEMENTS: STAFF SALARY BADGES, TABS & ACCORDION
+   ==================================================================== */
+.badge-salary-fixed {
+    background-color: #FDF2F8;
+    color: #BE185D;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    display: inline-block;
+}
+
+.badge-salary-hourly {
+    background-color: #EFF6FF;
+    color: #2563EB;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    display: inline-block;
+}
+
+.badge-salary-daily {
+    background-color: #F0FDF4;
+    color: #16A34A;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    display: inline-block;
+}
+
+.cc-staff-salary-kpi-card {
+    border: 1px solid #E2E8F0;
+    border-radius: 8px;
+    padding: 14px 18px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 14px;
+    background: #FFFFFF;
+}
+
+.cc-staff-salary-kpi-card .col-left {
+    border-right: 1px solid #E2E8F0;
+    padding-right: 16px;
+    text-align: center;
+}
+
+.cc-staff-salary-kpi-card .col-right {
+    text-align: center;
+}
+
+.cc-staff-salary-kpi-card .title {
+    font-size: 12px;
+    color: #64748B;
+    margin-bottom: 6px;
+}
+
+.cc-staff-salary-kpi-card .val {
+    font-size: 22px;
+    font-weight: 800;
+    color: #0F172A;
+}
+
+.cc-subtabs {
+    display: flex;
+    gap: 20px;
+    border-bottom: 1px solid #E2E8F0;
+    margin-bottom: 14px;
+}
+
+.cc-subtab-btn {
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    padding: 6px 4px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #64748B;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.cc-subtab-btn.active {
+    color: #0070F3;
+    border-bottom-color: #0070F3;
+}
+
+.cc-pill-switch {
+    display: inline-flex;
+    background: #F1F5F9;
+    border-radius: 20px;
+    padding: 2px;
+    gap: 2px;
+}
+
+.cc-pill-switch-btn {
+    background: transparent;
+    border: none;
+    border-radius: 18px;
+    padding: 4px 12px;
+    font-size: 11px;
+    font-weight: 600;
+    color: #64748B;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.cc-pill-switch-btn.active {
+    background: #0070F3;
+    color: #FFFFFF;
+    font-weight: 700;
+    box-shadow: 0 1px 3px rgba(0, 112, 243, 0.2);
+}
+
+.cc-icon-toggle-btn {
+    background: #F8FAFC;
+    border: 1px solid #E2E8F0;
+    border-radius: 6px;
+    padding: 3px 8px;
+    font-size: 14px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s, border-color 0.15s;
+}
+
+.cc-icon-toggle-btn:hover {
+    background: #EFF6FF;
+    border-color: #BFDBFE;
+}
+
