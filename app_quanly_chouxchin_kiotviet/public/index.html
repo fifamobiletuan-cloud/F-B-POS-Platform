@@ -8,7 +8,7 @@
     <meta http-equiv="Expires" content="0">
     <title>CHOUX CHIN F&amp;B - Quản Lý Quán Ăn Vặt Choux Chin</title>
     <link rel="icon" type="image/x-icon" href="/chouxchin/man/assets/favicon.ico">
-    <link rel="stylesheet" href="/chouxchin/man/css/chouxchin.css?v=20261105_1">
+    <link rel="stylesheet" href="/chouxchin/man/css/chouxchin.css?v=20261105_2">
     <!-- Chart.js Thư viện Biểu đồ -->
     <script src="/chouxchin/man/js/chart.min.js"></script>
 </head>
@@ -70,9 +70,11 @@
             <!-- Nút Chọn Chi Nhánh (Khớp 100% Ảnh Đính Kèm) -->
             <div class="kv-pill-store-dropdown" id="branchDropdownContainer" style="position: relative;">
                 <div class="kv-pill-store-btn" id="btnHeaderBranch" onclick="toggleBranchMenu(event)" title="Bấm để chọn chi nhánh làm việc">
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="#0070F3"><path d="M20 4H4v2h16V4zm1 10v-2l-1-5H4l-1 5v2h1v6h10v-6h4v6h2v-6h1zm-9 4H6v-4h6v4z"/></svg>
-                    <span id="headerBranchName">Chi nhánh trung tâm</span>
-                    <span style="font-size: 10px; color: #64748B; margin-left: 2px;">▾</span>
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="#0070F3" style="flex-shrink:0;"><path d="M20 4H4v2h16V4zm1 10v-2l-1-5H4l-1 5v2h1v6h10v-6h4v6h2v-6h1zm-9 4H6v-4h6v4z"/></svg>
+                    <div class="kv-pill-text-wrap">
+                        <span class="kv-pill-top" id="headerBranchPrefix">Chi nhánh</span>
+                        <span class="kv-pill-bot" id="headerBranchName">trung tâm</span>
+                    </div>
                 </div>
                 <!-- Menu xổ xuống chọn chi nhánh -->
                 <div class="kv-branch-menu" id="headerBranchMenu" style="display: none;">
@@ -1624,6 +1626,6 @@
     </div>
 
     <!-- JavaScript Chính -->
-    <script src="/chouxchin/man/js/app.js?v=20261105_1"></script>
+    <script src="/chouxchin/man/js/app.js?v=20261105_2"></script>
 </body>
 </html>

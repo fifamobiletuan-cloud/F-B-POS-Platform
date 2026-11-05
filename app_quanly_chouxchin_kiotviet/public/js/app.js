@@ -320,12 +320,20 @@ function selectBranch(branchId, branchName) {
     AppState.currentBranchId = String(branchId);
     AppState.currentBranchName = branchName;
 
-    const shortName = (branchId === 'ALL') ? 'Tất cả chi nhánh' : branchName;
+    const prefixEl = document.getElementById('headerBranchPrefix');
     const headerEl = document.getElementById('headerBranchName');
-    if (headerEl) headerEl.innerText = shortName;
+    
+    if (branchId === 'ALL') {
+        if (prefixEl) prefixEl.innerText = 'Toàn';
+        if (headerEl) headerEl.innerText = 'hệ thống';
+    } else {
+        if (prefixEl) prefixEl.innerText = 'Chi nhánh';
+        let bName = branchName.replace(/Chi nhánh\s*/i, '').trim();
+        if (headerEl) headerEl.innerText = bName || 'trung tâm';
+    }
 
     const dashEl = document.getElementById('dashboardBranchName');
-    if (dashEl) dashEl.innerText = shortName;
+    if (dashEl) dashEl.innerText = (branchId === 'ALL') ? 'Toàn hệ thống (Tất cả chi nhánh)' : branchName;
 
     document.querySelectorAll('.kv-branch-item').forEach(it => {
         if (it.getAttribute('data-branch') === String(branchId)) {
@@ -1639,9 +1647,6 @@ function openTableDetailModal(tableNumber) {
             </div>
         `;
     }
-
-    openModal('modalTableDetail');
-}
 
     openModal('modalTableDetail');
 }
