@@ -360,6 +360,13 @@ class _HomeMenuScreenState extends State<HomeMenuScreen>
         });
       }
     });
+
+    // Tự động mở bảng thông báo thương hiệu ChouxChin ngay khi vừa vào app
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        _showBrandLogoDialog();
+      }
+    });
   }
 
   @override
