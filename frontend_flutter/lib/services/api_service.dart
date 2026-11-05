@@ -6,7 +6,7 @@ import '../models/models.dart';
 String _img(String path) => 'assets/images/$path';
 
 class ApiService {
-  static const String baseUrl = 'https://assurance-lawrence-revised-scientific.trycloudflare.com/api/v1';
+  static const String baseUrl = 'https://immediate-lite-frankfurt-look.trycloudflare.com/api/v1';
 
   // ─────────────────────────────────────────────────────────
   //  DANH MỤC ĂN VẶT VIỆT NAM — TikTok Shop Style
@@ -1693,6 +1693,19 @@ class ApiService {
   }
 
   static Future<List<ProductOption>> getToppings() async => _mockToppings;
+
+  static Future<bool> checkinTable(String tableNumber) async {
+    try {
+      final res = await http.post(
+        Uri.parse('$baseUrl/customer/table-checkin'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'tableNumber': tableNumber}),
+      );
+      return res.statusCode == 200;
+    } catch (_) {
+      return false;
+    }
+  }
 
   static Future<bool> createOrder(OrderModel order) async {
     _mockOrders.insert(0, order);

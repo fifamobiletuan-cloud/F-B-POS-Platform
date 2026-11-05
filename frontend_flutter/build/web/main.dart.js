@@ -25777,7 +25777,7 @@ aJl(a){var s=0,r=A.I(t.y),q,p=2,o=[],n,m,l,k,j,i,h,g
 var $async$Zc=A.J(function(b,c){if(b===1){o.push(c)
 s=p}for(;;)switch(s){case 0:B.b.lo($.aJk,0,a)
 p=4
-m=A.id("https://assurance-lawrence-revised-scientific.trycloudflare.com/api/v1/customer/orders",0,null)
+m=A.id("https://immediate-lite-frankfurt-look.trycloudflare.com/api/v1/customer/orders",0,null)
 l=t.N
 k=A.ab(["Content-Type","application/json"],l,l)
 j=a.c

@@ -87,6 +87,7 @@ class _CustomerOrderScreenState extends State<CustomerOrderScreen> {
     final table = _resolveTable();
     _cart = CartState(currentTable: table);
     // Khởi tạo menu ngay lập tức 0 giây, không chờ đợi timeout
+    ApiService.checkinTable(table);
     _products = ApiService.getProductsByCategory('All');
     _loadData();
   }
