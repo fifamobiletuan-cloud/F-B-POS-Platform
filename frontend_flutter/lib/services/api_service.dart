@@ -6,7 +6,7 @@ import '../models/models.dart';
 String _img(String path) => 'assets/images/$path';
 
 class ApiService {
-  static const String baseUrl = 'https://immediate-lite-frankfurt-look.trycloudflare.com/api/v1';
+  static const String baseUrl = 'https://automatically-thumbzilla-metallic-required.trycloudflare.com/api/v1';
 
   // ─────────────────────────────────────────────────────────
   //  DANH MỤC ĂN VẶT VIỆT NAM — TikTok Shop Style

@@ -25777,7 +25777,7 @@ Zc(a){return A.aJo(a)},
 aJo(a){var s=0,r=A.I(t.y),q,p=2,o=[],n,m,l,k,j,i
 var $async$Zc=A.J(function(b,c){if(b===1){o.push(c)
 s=p}for(;;)switch(s){case 0:p=4
-m=A.hC("https://immediate-lite-frankfurt-look.trycloudflare.com/api/v1/customer/table-checkin",0,null)
+m=A.hC("https://automatically-thumbzilla-metallic-required.trycloudflare.com/api/v1/customer/table-checkin",0,null)
 l=t.N
 k=A.aa(["Content-Type","application/json"],l,l)
 s=7
@@ -25807,7 +25807,7 @@ aJp(a){var s=0,r=A.I(t.y),q,p=2,o=[],n,m,l,k,j,i,h,g
 var $async$Zd=A.J(function(b,c){if(b===1){o.push(c)
 s=p}for(;;)switch(s){case 0:B.b.lo($.aJn,0,a)
 p=4
-m=A.hC("https://immediate-lite-frankfurt-look.trycloudflare.com/api/v1/customer/orders",0,null)
+m=A.hC("https://automatically-thumbzilla-metallic-required.trycloudflare.com/api/v1/customer/orders",0,null)
 l=t.N
 k=A.aa(["Content-Type","application/json"],l,l)
 j=a.c
